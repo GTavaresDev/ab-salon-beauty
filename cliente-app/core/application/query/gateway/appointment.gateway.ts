@@ -3,7 +3,10 @@ import { failure, success, type Either } from "@core/application/query/common/ei
 import type { ApiAppointment, CreateAppointmentRequest, RequestError, UpdateAppointmentRequest, HttpRequest } from "@core/application/query/contract/appointment.contract";
 import { toClientAppointmentDTO, type ClientAppointmentDTO, type ClientAppointmentsView } from "@core/application/interfaces/appointments/client-appointment";
 
-export const apiBaseUrl = () => process.env.CLIENT_AGENDA_API_URL ?? "https://agendamentos-codebase-server.vercel.app";
+export const apiBaseUrl = () => {
+  const configuredUrl = process.env.CLIENT_AGENDA_API_URL?.trim();
+  return (configuredUrl || "https://www.visione-web.com").replace(/\/+$/, "");
+};
 
 export type PendingAppointmentReview = { appointmentId: string; date: string; time: string; professionalName: string | null };
 

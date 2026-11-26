@@ -12,8 +12,7 @@ export type PendingAppointmentReview = { appointmentId: string; date: string; ti
 
 /** Só os agendamentos do cliente autenticado — o filtro é da consulta. */
 export async function getClientAppointmentsAction(): Promise<ClientAppointmentsView> {
-  const session = await requireClientSession();
-  const result = await getMyAppointmentsGateway(session.clientId);
+  const result = await getMyAppointmentsGateway();
   if (result.tag === "left") throw new Error(result.value.message);
   return result.value;
 }
@@ -86,8 +85,7 @@ export async function submitAppointmentReviewAction(appointmentId: string, ratin
 export async function getClientAppointmentAction(
   id: string,
 ): Promise<ClientAppointmentDTO | null> {
-  const session = await requireClientSession();
-  const result = await getMyAppointmentGateway(session.clientId, id);
+  const result = await getMyAppointmentGateway(id);
   if (result.tag === "left") throw new Error(result.value.message);
   return result.value;
 }
@@ -96,8 +94,7 @@ export async function cancelClientAppointmentAction(
   id: string,
 ): Promise<ActionResult<null>> {
   try {
-    const session = await requireClientSession();
-    const result = await cancelMyAppointmentGateway(session.clientId, id);
+    const result = await cancelMyAppointmentGateway(id);
     if (result.tag === "left") return { success: false, error: result.value.message };
 
     revalidatePath("/cliente/painel/meus-agendamentos");

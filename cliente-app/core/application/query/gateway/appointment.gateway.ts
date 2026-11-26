@@ -1,3 +1,4 @@
+import { getApiToken } from "@/lib/client-agenda-token";
 import { failure, success, type Either } from "@core/application/query/common/either";
 import type { ApiAppointment, CreateAppointmentRequest, RequestError, UpdateAppointmentRequest, HttpRequest } from "@core/application/query/contract/appointment.contract";
 import { toClientAppointmentDTO, type ClientAppointmentDTO, type ClientAppointmentsView } from "@core/application/interfaces/appointments/client-appointment";
@@ -6,16 +7,16 @@ export const apiBaseUrl = () => process.env.CLIENT_AGENDA_API_URL ?? "https://ag
 
 export type PendingAppointmentReview = { appointmentId: string; date: string; time: string; professionalName: string | null };
 
-export async function getPendingReviewsGateway(clientId: string): Promise<Either<RequestError, PendingAppointmentReview[]>> {
-  const token = await getApiToken(clientId);
+export async function getPendingReviewsGateway(): Promise<Either<RequestError, PendingAppointmentReview[]>> {
+  const token = await getApiToken();
   if (token.tag === "left") return token;
-  return clientHttp<PendingAppointmentReview[]>({ url: `${apiBaseUrl()}/appointments/reviews/pending`, headers: { authorization: `Bearer ${token.value}` } });
+  return clientHttp<PendingAppointmentReview[]>({ url: `${apiBaseUrl()}/appointments/reviews/pending`, headers: { authorization: `Bearer ${token.value.accessToken}` } });
 }
 
-export async function submitReviewGateway(clientId: string, appointmentId: string, rating: number): Promise<Either<RequestError, { success: true }>> {
-  const token = await getApiToken(clientId);
+export async function submitReviewGateway(appointmentId: string, rating: number): Promise<Either<RequestError, { success: true }>> {
+  const token = await getApiToken();
   if (token.tag === "left") return token;
-  return clientHttp<{ success: true }>({ url: `${apiBaseUrl()}/appointments/reviews/${encodeURIComponent(appointmentId)}`, method: "POST", headers: { authorization: `Bearer ${token.value}` }, body: { rating } });
+  return clientHttp<{ success: true }>({ url: `${apiBaseUrl()}/appointments/reviews/${encodeURIComponent(appointmentId)}`, method: "POST", headers: { authorization: `Bearer ${token.value.accessToken}` }, body: { rating } });
 }
 
 export async function clientHttp<T>(request: HttpRequest, timeoutMs = 10_000): Promise<Either<RequestError, T>> {
@@ -37,22 +38,12 @@ export async function clientHttp<T>(request: HttpRequest, timeoutMs = 10_000): P
   } finally { clearTimeout(timeout); }
 }
 
-export async function getApiToken(clientId: string): Promise<Either<RequestError, string>> {
-  const secret = process.env.CLIENT_AGENDA_SECRET;
-  if (!secret) return failure({ message: "CLIENT_AGENDA_SECRET não configurado.", code: "CONFIGURATION_ERROR" });
-  const result = await clientHttp<{ accessToken: string }>({
-    url: `${apiBaseUrl()}/auth/token`, method: "POST",
-    headers: { "x-client-agenda-secret": secret, "x-client-id": clientId },
-  });
-  return result.tag === "left" ? result : success(result.value.accessToken);
-}
-
-export async function getMyAppointmentsGateway(clientId: string): Promise<Either<RequestError, ClientAppointmentsView>> {
-  const token = await getApiToken(clientId);
+export async function getMyAppointmentsGateway(): Promise<Either<RequestError, ClientAppointmentsView>> {
+  const token = await getApiToken();
   if (token.tag === "left") return token;
   const result = await clientHttp<ApiAppointment[]>({
-    url: `${apiBaseUrl()}/appointments/client/${encodeURIComponent(clientId)}`,
-    headers: { authorization: `Bearer ${token.value}` },
+    url: `${apiBaseUrl()}/appointments/client/${encodeURIComponent(token.value.clientId)}`,
+    headers: { authorization: `Bearer ${token.value.accessToken}` },
   });
   if (result.tag === "left") return result;
   const all = result.value.map((item) => toClientAppointmentDTO(item));
@@ -73,12 +64,12 @@ export async function getMyAppointmentsGateway(clientId: string): Promise<Either
 }
 
 
-export async function getMyAppointmentGateway(clientId: string, id: string): Promise<Either<RequestError, ClientAppointmentDTO | null>> {
-  const token = await getApiToken(clientId);
+export async function getMyAppointmentGateway(id: string): Promise<Either<RequestError, ClientAppointmentDTO | null>> {
+  const token = await getApiToken();
   if (token.tag === "left") return token;
   const result = await clientHttp<ApiAppointment[]>({
     url: `${apiBaseUrl()}/appointments/${encodeURIComponent(id)}`,
-    headers: { authorization: `Bearer ${token.value}` },
+    headers: { authorization: `Bearer ${token.value.accessToken}` },
   });
   if (result.tag === "left") {
     return result.value.statusCode === 404 ? success(null) : result;
@@ -87,45 +78,43 @@ export async function getMyAppointmentGateway(clientId: string, id: string): Pro
 }
 
 export async function createAppointmentGateway(
-  clientId: string,
   input: CreateAppointmentRequest,
 ): Promise<Either<RequestError, ClientAppointmentDTO>> {
-  const token = await getApiToken(clientId);
+  const token = await getApiToken();
   if (token.tag === "left") return token;
   const result = await clientHttp<ApiAppointment>({
     url: `${apiBaseUrl()}/appointments`,
     method: "POST",
-    headers: { authorization: `Bearer ${token.value}` },
-    body: { ...input, clientId },
+    headers: { authorization: `Bearer ${token.value.accessToken}` },
+    body: { ...input, clientId: token.value.clientId },
   });
   if (result.tag === "left") return result;
   return success(toClientAppointmentDTO(result.value));
 }
 
 export async function updateAppointmentGateway(
-  clientId: string,
   id: string,
   input: UpdateAppointmentRequest,
 ): Promise<Either<RequestError, ClientAppointmentDTO>> {
-  const token = await getApiToken(clientId);
+  const token = await getApiToken();
   if (token.tag === "left") return token;
   const result = await clientHttp<ApiAppointment>({
     url: `${apiBaseUrl()}/appointments/${encodeURIComponent(id)}`,
     method: "PATCH",
-    headers: { authorization: `Bearer ${token.value}` },
-    body: { ...input, clientId },
+    headers: { authorization: `Bearer ${token.value.accessToken}` },
+    body: { ...input, clientId: token.value.clientId },
   });
   if (result.tag === "left") return result;
   return success(toClientAppointmentDTO(result.value));
 }
 
-export async function cancelMyAppointmentGateway(clientId: string, id: string): Promise<Either<RequestError, null>> {
-  const token = await getApiToken(clientId);
+export async function cancelMyAppointmentGateway(id: string): Promise<Either<RequestError, null>> {
+  const token = await getApiToken();
   if (token.tag === "left") return token;
   const result = await clientHttp<unknown>({
-    url: `${apiBaseUrl()}/appointments/${encodeURIComponent(id)}?clientId=${encodeURIComponent(clientId)}`,
+    url: `${apiBaseUrl()}/appointments/${encodeURIComponent(id)}?clientId=${encodeURIComponent(token.value.clientId)}`,
     method: "DELETE",
-    headers: { authorization: `Bearer ${token.value}` },
+    headers: { authorization: `Bearer ${token.value.accessToken}` },
   });
   if (result.tag === "left") return result;
   return success(null);

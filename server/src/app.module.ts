@@ -7,13 +7,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { ClientAgendaGuard } from './security/client/client-agenda.guard.js';
 import { ClientAgendaRateGuard } from './security/client/client-agenda.rate.guard.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TokenAuth } from './security/token-auth.entity.js';
-import { TokenAuthController } from './security/token-auth.controller.js';
-import { TokenAuthService } from './security/token-auth.service.js';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TokenAuth]),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['../.env.local', '.env'],
@@ -35,10 +31,9 @@ import { TokenAuthService } from './security/token-auth.service.js';
     }),
     AppointmentsModule,
   ],
-  controllers: [AppController, TokenAuthController],
+  controllers: [AppController],
   providers: [
     AppService,
-    TokenAuthService,
     { provide: APP_GUARD, useClass: ClientAgendaGuard },
     { provide: APP_GUARD, useClass: ClientAgendaRateGuard },
   ],

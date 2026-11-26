@@ -11,7 +11,6 @@ import { createHash } from 'node:crypto';
 export class ClientAgendaRateGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    if (request.path === '/auth/token') return true;
     const actor = request.clientAgendaActor;
     const endpoint = process.env.UPSTASH_REDIS_REST_URL;
 

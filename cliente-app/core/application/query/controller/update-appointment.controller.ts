@@ -26,8 +26,8 @@ export async function updateClientAppointmentAction(input: z.infer<typeof update
     const parsed = updateSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: "Dados do agendamento inválidos." };
     const [servicesResult, professionalsResult] = await Promise.all([
-      getBookableServicesGateway(session.clientId),
-      getBookableProfessionalsGateway(session.clientId, parsed.data.serviceId),
+      getBookableServicesGateway(),
+      getBookableProfessionalsGateway(parsed.data.serviceId),
     ]);
     if (servicesResult.tag === "left") return { success: false, error: servicesResult.value.message };
     const service = servicesResult.value.find((item) => item.id === parsed.data.serviceId);
@@ -38,10 +38,10 @@ export async function updateClientAppointmentAction(input: z.infer<typeof update
     if (!professional || professional.role === "Administrador") {
       return { success: false, error: "Profissional indisponível." };
     }
-    const availableResult = await getAvailableTimesGateway(session.clientId, service.id, parsed.data.date);
+    const availableResult = await getAvailableTimesGateway(service.id, parsed.data.date);
     const available = availableResult.tag === "right" ? availableResult.value : [];
     if (!available.includes(parsed.data.time)) return { success: false, error: "Este horário não está disponível. Escolha outro horário." };
-    const updated = await updateAppointmentGateway(session.clientId, parsed.data.appointmentId, {
+    const updated = await updateAppointmentGateway(parsed.data.appointmentId, {
       date: parsed.data.date, time: parsed.data.time, name: session.name, service: service.name,
       duration: durationLabelFromMinutes(service.durationMinutes), professionalName: professional.name,
       userId: professional.id, serviceId: service.id,

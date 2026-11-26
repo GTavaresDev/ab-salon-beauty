@@ -3,5 +3,5 @@ import unit from "./vitest.config.mjs";
 
 export default defineConfig({
   ...unit,
-  test: { environment: "node", include: ["test/**/*.integration.test.ts"] },
+  test: { environment: "node", include: ["test/**/*.integration.test.ts"], setupFiles: ["./vitest.setup.ts"] },
 });

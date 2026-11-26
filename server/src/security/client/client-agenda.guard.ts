@@ -41,7 +41,6 @@ export class ClientAgendaGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    if (request.path === '/auth/token') return true;
 
     try {
       const token = request.headers.authorization?.match(

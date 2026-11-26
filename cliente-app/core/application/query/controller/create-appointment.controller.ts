@@ -44,8 +44,8 @@ export async function createClientAppointmentAction(input: {
     }
 
     const [servicesResult, professionalsResult] = await Promise.all([
-      getBookableServicesGateway(session.clientId),
-      getBookableProfessionalsGateway(session.clientId, parsed.data.serviceId),
+      getBookableServicesGateway(),
+      getBookableProfessionalsGateway(parsed.data.serviceId),
     ]);
     if (servicesResult.tag === "left") return { success: false, error: servicesResult.value.message };
     const service = servicesResult.value.find((item) => item.id === parsed.data.serviceId);
@@ -57,13 +57,13 @@ export async function createClientAppointmentAction(input: {
       return { success: false, error: "Profissional indisponível." };
     }
 
-    const availableResult = await getAvailableTimesGateway(session.clientId, service.id, parsed.data.date);
+    const availableResult = await getAvailableTimesGateway(service.id, parsed.data.date);
     const available = availableResult.tag === "right" ? availableResult.value : [];
     if (!available.includes(parsed.data.time)) {
       return { success: false, error: "Este horário não está mais disponível. Escolha outro horário." };
     }
 
-    const created = await createAppointmentGateway(session.clientId, {
+    const created = await createAppointmentGateway({
       date: parsed.data.date,
       time: parsed.data.time,
       name: session.name,

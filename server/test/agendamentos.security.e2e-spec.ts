@@ -87,6 +87,22 @@ describe('Segurança e2e de agendamentos', () => {
     await app?.close();
   });
 
+  it('remove a rota de emissão com segredo compartilhado', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/token')
+      .set('x-client-agenda-secret', 'segredo-legado-de-teste')
+      .set('x-client-id', clientA.id)
+      .expect(404);
+  });
+
+  it('retorna 404 ao avaliar agendamento de outro cliente', async () => {
+    await request(app.getHttpServer())
+      .post(`/appointments/reviews/${appointmentB}`)
+      .set(auth(clientA))
+      .send({ rating: 5 })
+      .expect(404);
+  });
+
   it('retorna 401 sem token', async () => request(app.getHttpServer()).get(`/appointments/${appointmentA}`).expect(401));
   it('retorna 401 para token assinado por outra chave', async () => request(app.getHttpServer()).get(`/appointments/${appointmentA}`).set('Authorization', `Bearer ${tokenFor(clientA.id, { secret: 'outro-segredo' })}`).expect(401));
   it('retorna 401 para token expirado', async () => request(app.getHttpServer()).get(`/appointments/${appointmentA}`).set(auth(clientA)).set('Authorization', `Bearer ${tokenFor(clientA.id, { expired: true })}`).expect(401));

@@ -8,10 +8,7 @@ import { useAppShell } from "@/stores/app-shell.store";
 import { useAppointments } from "@/app/(agendamentos)/(left-nav-bar)/agenda/hooks/use-appointments";
 import { useClients } from "@/app/(agendamentos)/(left-nav-bar)/clientes/hooks/use-clients";
 import { useServices } from "@/app/(agendamentos)/(left-nav-bar)/servicos/hooks/use-services";
-import {
-  isPendingNotificationDismissed,
-  dismissPendingNotification,
-} from "../lib/pending-notification-storage";
+import { dismissPendingNotification } from "../lib/pending-notification-storage";
 
 export function useDashboardView() {
   const router = useRouter();
@@ -26,7 +23,7 @@ export function useDashboardView() {
 
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [onlyPending, setOnlyPending] = useState(false);
-  const [isPendingModalOpen, setIsPendingModalOpen] = useState(() => !isPendingNotificationDismissed());
+  const [dismissedOnThisVisit, setDismissedOnThisVisit] = useState(false);
 
   const onNew = () => router.push("/agenda?novo=1");
   const onVerAgenda = () => router.push("/agenda");
@@ -95,12 +92,12 @@ export function useDashboardView() {
 
   const handleClosePendingModal = () => {
     dismissPendingNotification();
-    setIsPendingModalOpen(false);
+    setDismissedOnThisVisit(true);
   };
 
   const handleReviewPending = () => {
     dismissPendingNotification();
-    setIsPendingModalOpen(false);
+    setDismissedOnThisVisit(true);
     setOnlyPending(true);
   };
   return {
@@ -114,7 +111,7 @@ export function useDashboardView() {
     setOpenMenuId,
     onlyPending,
     setOnlyPending,
-    isPendingModalOpen,
+    isPendingModalOpen: pendingAppointments.length > 0 && !dismissedOnThisVisit,
     onNew,
     onVerAgenda,
     appointments,

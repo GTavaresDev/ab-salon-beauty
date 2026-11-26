@@ -33,6 +33,9 @@ import { appointmentAttendantLabel } from "@/lib/appointment-attendant";
 import { PendingAppointmentsModal } from "@/app/(agendamentos)/(left-nav-bar)/dashboard/_components/pending-appointments-modal.component";
 import { shouldOpenActionMenuUp } from "@/lib/action-menu-placement";
 
+const agendaColumns =
+  "grid-cols-[3.5rem_minmax(0,1.5fr)_minmax(0,1.15fr)_minmax(0,1.35fr)_minmax(0,0.75fr)_minmax(0,1.25fr)_2.75rem]";
+
 export function AgendaView({
   appointments,
   onStatusChange,
@@ -106,14 +109,14 @@ export function AgendaView({
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
         {/* Main Agenda Table Card */}
-        <Card className="order-2 overflow-hidden xl:order-1">
+        <Card className="@container/agenda order-2 min-w-0 overflow-hidden xl:order-1">
         <CardHeader className="border-b border-zinc-100 bg-zinc-50/70 p-4 sm:px-6">
-          <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-2.5 @min-[44rem]/agenda:flex-row @min-[44rem]/agenda:items-center @min-[44rem]/agenda:justify-between">
             <CardTitle className="flex shrink-0 items-start gap-2 text-base">
               <CalendarDays className="mt-0.5 size-4 shrink-0" />
               <span>{onlyPending ? "Atendimentos a confirmar" : "Horários e Atendimentos"}</span>
             </CardTitle>
-            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-start gap-1.5 lg:justify-end">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-start gap-1.5 @min-[44rem]/agenda:justify-end">
               {/* Toggle similar to Dashboard */}
               <div className="inline-flex h-8 items-center rounded-lg border border-zinc-200 bg-zinc-100/80 p-0.5 shrink-0">
                 <button
@@ -154,14 +157,14 @@ export function AgendaView({
               </div>
 
               {currentUserRole !== "Funcionario" && (
-                <div className="relative shrink-0">
+                <div className="relative max-w-full">
                   <select
                     value={agendaScope}
                     onChange={(e) => {
                       setAgendaScope(e.target.value);
                       setPage(1);
                     }}
-                    className="h-8 max-w-32 truncate appearance-none rounded-lg border border-zinc-200 bg-white pl-2 pr-6 text-xs font-medium text-zinc-700 outline-none transition hover:border-zinc-300 focus:border-zinc-400"
+                    className="h-8 max-w-full appearance-none rounded-lg border border-zinc-200 bg-white pl-2 pr-6 text-xs font-medium text-zinc-700 outline-none transition hover:border-zinc-300 focus:border-zinc-400"
                   >
                     <option value="Geral">Todas</option>
                     {userList
@@ -184,7 +187,7 @@ export function AgendaView({
                       setStatusFilter(e.target.value);
                       setPage(1);
                     }}
-                    className="h-8 max-w-32 truncate appearance-none rounded-lg border border-zinc-200 bg-white pl-2 pr-6 text-xs font-medium text-zinc-700 outline-none transition hover:border-zinc-300 focus:border-zinc-400"
+                    className="h-8 appearance-none rounded-lg border border-zinc-200 bg-white pl-2 pr-6 text-xs font-medium text-zinc-700 outline-none transition hover:border-zinc-300 focus:border-zinc-400"
                   >
                     <option value="Todos">Status: Todos</option>
                     <option value="Confirmado">Confirmado</option>
@@ -202,7 +205,7 @@ export function AgendaView({
 
         <CardContent className="p-0">
           {/* Header Row for desktop */}
-          <div className="hidden grid-cols-[80px_1.6fr_1.1fr_1.8fr_0.8fr_1.2fr_40px] items-center gap-3 border-b border-zinc-200 bg-zinc-100/60 px-6 py-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 lg:grid">
+          <div className={cn("hidden items-center gap-3 border-b border-zinc-200 bg-zinc-100/60 px-6 py-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 @min-[44rem]/agenda:grid", agendaColumns)}>
             <span>Horário</span>
             <span>Cliente</span>
             <span>Atendente</span>
@@ -218,6 +221,7 @@ export function AgendaView({
               const channelLabel = channelMap.get(item.channelId) || "Sistema";
               const serviceColor = resolveServiceColor(serviceList, item);
               const isPending = item.status === "Pendente";
+              const statusLabel = isPending ? "Aguardando confirmação" : item.status;
               const isTodayItem = item.date === todayIso;
 
               const isMine =
@@ -307,19 +311,20 @@ export function AgendaView({
                 <div
                   key={item.id || item.time}
                   className={cn(
-                    "group relative flex flex-col gap-1.5 p-3 sm:p-3.5 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/80 transition-colors lg:grid lg:grid-cols-[80px_1.6fr_1.1fr_1.8fr_0.8fr_1.2fr_40px] lg:items-center lg:py-2.5 lg:px-6 lg:border-b-0 lg:gap-3",
+                    "group relative flex flex-col gap-1.5 p-3 sm:p-3.5 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/80 transition-colors @min-[44rem]/agenda:grid @min-[44rem]/agenda:items-center @min-[44rem]/agenda:py-2.5 @min-[44rem]/agenda:px-6 @min-[44rem]/agenda:border-b-0 @min-[44rem]/agenda:gap-3",
+                    agendaColumns,
                     isPending && "bg-amber-50/20 hover:bg-amber-50/40",
                   )}
                 >
-                  {/* Line 1 for Mobile (< lg): Avatar + Name on left, Time + Status + Menu on right */}
-                  <div className="flex items-center justify-between gap-2 lg:hidden">
-                    <div className="flex items-center gap-2.5 min-w-0">
+                  {/* Line 1 for compact layout: Avatar + Name on left, Time + Status + Menu on right */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 @min-[44rem]/agenda:hidden">
+                    <div className="flex min-w-0 flex-1 basis-40 items-center gap-2.5">
                       <Avatar
                         initials={item.initials}
                         className="size-8 bg-zinc-900 text-white shrink-0 text-xs font-semibold"
                       />
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-zinc-900">
+                        <p className="wrap-anywhere text-sm font-semibold text-zinc-900">
                           {item.name}
                         </p>
                         {onlyPending && (
@@ -329,7 +334,7 @@ export function AgendaView({
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-1.5">
                       <span className="inline-flex items-center gap-1 rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-bold text-zinc-950">
                         <Clock3 className="size-3 text-zinc-500" />
                         {item.time}
@@ -337,27 +342,27 @@ export function AgendaView({
                       <Badge
                         variant={getStatusBadgeVariant(item.status)}
                         className={cn(
-                          "text-[11px] px-2 py-0.5",
+                          "max-w-full whitespace-normal wrap-anywhere px-2 py-0.5 text-[11px]",
                           isPending && "border-amber-300 bg-amber-100 text-amber-800 font-semibold",
                         )}
                       >
-                        {isPending ? "Aguardando" : item.status}
+                        {statusLabel}
                       </Badge>
                       <div className="relative">{actionMenuNode}</div>
                     </div>
                   </div>
 
-                  {/* Line 2 for Mobile (< lg): Service, Duration, Attendant indented under name */}
-                  <div className="flex items-center gap-1.5 text-xs text-zinc-500 min-w-0 overflow-hidden whitespace-nowrap pl-[42px] lg:hidden">
-                    {item.service && <ServiceBadge color={serviceColor} name={item.service} className="shrink-0" />}
-                    <span className="text-zinc-300 shrink-0">•</span>
-                    <span className="shrink-0">{item.duration}</span>
-                    <span className="text-zinc-300 shrink-0">•</span>
-                    <span className="text-zinc-600 font-medium truncate min-w-0">{attendantLabel}</span>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pl-[42px] text-xs text-zinc-500 @min-[44rem]/agenda:hidden">
+                    {item.service && (
+                      <ServiceBadge color={serviceColor} name={item.service} className="max-w-full shrink whitespace-normal wrap-anywhere" />
+                    )}
+                    <span className="whitespace-nowrap">{item.duration}</span>
+                    <span className="wrap-anywhere font-medium text-zinc-600">{attendantLabel}</span>
+                    <span className="wrap-anywhere">{channelLabel}</span>
                   </div>
 
-                  {/* Desktop Time (lg:flex) */}
-                  <div className="hidden lg:flex flex-col font-semibold text-zinc-950">
+                  {/* Desktop Time */}
+                  <div className="hidden @min-[44rem]/agenda:flex flex-col font-semibold text-zinc-950">
                     <span className="text-sm">{item.time}</span>
                     {(!isTodayItem || onlyPending) && (
                       <span className="text-[10px] font-semibold text-amber-700 leading-tight">
@@ -367,50 +372,51 @@ export function AgendaView({
                   </div>
 
                   {/* Desktop Client Info */}
-                  <div className="hidden lg:flex items-center gap-2.5 min-w-0">
+                  <div className="hidden @min-[44rem]/agenda:flex items-center gap-2.5 min-w-0">
                     <Avatar
                       initials={item.initials}
                       className="size-8 bg-zinc-900 text-white shrink-0 text-xs font-semibold"
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-zinc-900">
+                      <p className="wrap-anywhere text-sm font-semibold text-zinc-900">
                         {item.name}
                       </p>
                     </div>
                   </div>
 
                   {/* Desktop Column 3: Attendant */}
-                  <div className="hidden lg:block min-w-0 text-xs font-medium text-zinc-700">
-                    <p className="truncate">{attendantLabel}</p>
+                  <div className="hidden @min-[44rem]/agenda:block min-w-0 text-xs font-medium text-zinc-700">
+                    <p className="wrap-anywhere">{attendantLabel}</p>
                   </div>
 
                   {/* Desktop Column 4: Service & Duration */}
-                  <div className="hidden lg:flex min-w-0 items-center gap-1.5 text-xs text-zinc-500 whitespace-nowrap">
-                    {item.service && <ServiceBadge color={serviceColor} name={item.service} />}
-                    <span aria-hidden className="text-zinc-400">•</span>
+                  <div className="hidden min-w-0 flex-col items-start gap-1 text-xs text-zinc-500 @min-[44rem]/agenda:flex">
+                    {item.service && (
+                      <ServiceBadge color={serviceColor} name={item.service} className="max-w-full whitespace-normal wrap-anywhere" />
+                    )}
                     <span>{item.duration}</span>
                   </div>
 
                   {/* Desktop Column 5: Channel */}
-                  <div className="hidden lg:block text-xs font-medium text-zinc-500">
+                  <div className="hidden @min-[44rem]/agenda:block wrap-anywhere text-xs font-medium text-zinc-500">
                     {channelLabel}
                   </div>
 
                   {/* Desktop Column 6: Status */}
-                  <div className="hidden lg:flex items-center gap-2 min-w-0">
+                  <div className="hidden @min-[44rem]/agenda:flex items-center gap-2 min-w-0">
                     <Badge
                       variant={getStatusBadgeVariant(item.status)}
                       className={cn(
-                        "truncate",
+                        "max-w-full whitespace-normal wrap-anywhere",
                         isPending && "border-amber-300 bg-amber-100 text-amber-800 font-semibold",
                       )}
                     >
-                      {isPending ? "Aguardando confirmação" : item.status}
+                      {statusLabel}
                     </Badge>
                   </div>
 
                   {/* Desktop Column 7: Actions */}
-                  <div className="hidden lg:flex relative justify-end">
+                  <div className="hidden @min-[44rem]/agenda:flex relative justify-end text-right">
                     {actionMenuNode}
                   </div>
                 </div>

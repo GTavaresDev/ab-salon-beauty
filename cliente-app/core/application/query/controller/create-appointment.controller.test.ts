@@ -62,7 +62,7 @@ describe("createClientAppointmentAction security boundary", () => {
     } as Parameters<typeof createClientAppointmentAction>[0]);
 
     expect(result.success).toBe(true);
-    expect(mocks.createAppointmentGateway).toHaveBeenCalledWith("session-client", expect.objectContaining({
+    expect(mocks.createAppointmentGateway).toHaveBeenCalledWith(expect.objectContaining({
       serviceId: "service-1",
       service: "Consulta",
     }));

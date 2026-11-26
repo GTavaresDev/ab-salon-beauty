@@ -128,13 +128,12 @@ export function CreateUserDialog({
               <FieldLabel>Perfil</FieldLabel>
               <select
                 name="permissionLevel"
-                defaultValue={currentUserRole === "Gestor" ? "2" : "1"}
+                defaultValue={currentUserRole === "Gestor" ? "3" : "2"}
                 className="h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-800 outline-none"
               >
                 {currentUserRole === "Administrador" && (
-                  <option value="1">Nível 1 — Administrador (Total)</option>
+                  <option value="2">Nível 2 — Gestor (Intermediário)</option>
                 )}
-                <option value="2">Nível 2 — Gestor (Intermediário)</option>
                 <option value="3">Nível 3 — Funcionário (Operacional)</option>
               </select>
             </div>

@@ -1,5 +1,6 @@
 import { StaffRole, User } from "@core/application/query/interface/user.entity";
 import { UserRepository } from "@core/server/db/repository/user.repository";
+import { assertCanCreateRole } from "@core/server/rule/creatable-roles.business-rule";
 
 export interface UpdateUserInput {
   id: string;
@@ -8,6 +9,7 @@ export interface UpdateUserInput {
   phone?: string;
   password?: string;
   role?: StaffRole;
+  actorRole?: StaffRole;
   status?: "Ativo" | "Inativo";
   failedLoginAttempts?: number;
   lockedUntil?: Date | null;
@@ -19,6 +21,10 @@ export class UpdateUser {
   constructor(private userRepository: UserRepository) {}
 
   async execute(input: UpdateUserInput): Promise<User> {
+    if (input.role !== undefined) {
+      if (!input.actorRole) throw new Error("Operação não permitida");
+      assertCanCreateRole(input.actorRole, input.role);
+    }
     const user = await this.userRepository.findById(input.id);
     if (!user) {
       throw new Error("Usuário não encontrado.");

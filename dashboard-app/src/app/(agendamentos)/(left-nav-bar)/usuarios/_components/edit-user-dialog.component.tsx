@@ -208,19 +208,13 @@ export function EditUserDialog({
                 <option value="Inativo">Inativo</option>
               </select>
             </div>
-            {canEditUser && (
+            {canEditUser && user.role !== "Administrador" && (
               <div>
                 <FieldLabel>Perfil</FieldLabel>
                 <select
                   name="permissionLevel"
                   disabled={!canEditProfile}
-                  defaultValue={
-                    user.role === "Administrador"
-                      ? "1"
-                      : user.role === "Gestor"
-                        ? "2"
-                        : "3"
-                  }
+                  defaultValue={user.role === "Gestor" ? "2" : "3"}
                   className="h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-800 outline-none"
                 >
                   {profileOptions.map((option) => (

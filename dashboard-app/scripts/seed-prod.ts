@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "@core/server/auth/password";
+import { requireSeedPasswords } from "@core/server/rule/seed-password.business-rule";
 
 const prodDatabaseUrl =
   process.argv[2] ||
@@ -37,8 +38,21 @@ function formatDate(d: Date): string {
 }
 
 async function main() {
+  if (process.env.CONFIRM_PROD_SEED !== "yes") {
+    throw new Error("Seed de produção bloqueado: defina CONFIRM_PROD_SEED=yes para confirmar.");
+  }
+  if (process.env.NODE_ENV !== "production") {
+    throw new Error("Seed de produção bloqueado: NODE_ENV deve ser production.");
+  }
+  const seedPasswords = requireSeedPasswords(process.env, [
+    "SEED_ADMIN_PASSWORD",
+  ]);
+  const existingUsers = await prisma.user.count();
+  if (existingUsers > 0) {
+    throw new Error("Seed de produção bloqueado: o banco já contém usuários.");
+  }
+
   console.log("=== Inicializando Seed Completo de Produção ===");
-  console.log("URL Target:", targetUrl.replace(/:[^:@]+@/, ":****@"));
 
   // 1. Status de Atendimento
   console.log("\n1. Criando Status de Atendimento...");
@@ -58,8 +72,7 @@ async function main() {
 
   // 2. Usuários
   console.log("\n2. Criando Usuários...");
-  const adminPasswordHash = await hashPassword("zxcasd");
-  const gabrielPasswordHash = await hashPassword("lkjh-poiu-zxc10");
+  const adminPasswordHash = await hashPassword(seedPasswords.SEED_ADMIN_PASSWORD);
 
   const adminUser = await prisma.user.upsert({
     where: { email: "admin@agendamentos.com" },
@@ -75,64 +88,11 @@ async function main() {
       last: "Online",
     },
   });
-
-  const gabrielUser = await prisma.user.upsert({
-    where: { email: "gabriel@agendamentos.com" },
-    update: { name: "Gabriel Tavares", status: "Ativo" },
-    create: {
-      name: "Gabriel Tavares",
-      email: "gabriel@agendamentos.com",
-      phone: "(11) 99999-9999",
-      password: gabrielPasswordHash,
-      status: "Ativo",
-      initials: "GT",
-      last: "Online",
-    },
+  await prisma.userPermission.upsert({
+    where: { userId_name: { userId: adminUser.id, name: "Product Manegar" } },
+    update: { enabled: true },
+    create: { userId: adminUser.id, name: "Product Manegar" },
   });
-
-  const julianaUser = await prisma.user.upsert({
-    where: { email: "juliana@agendamentos.com" },
-    update: { name: "Dra. Juliana Martins", status: "Ativo" },
-    create: {
-      name: "Dra. Juliana Martins",
-      email: "juliana@agendamentos.com",
-      phone: "(11) 98888-0002",
-      password: adminPasswordHash,
-      status: "Ativo",
-      initials: "JM",
-      last: "Há 1h",
-    },
-  });
-
-  const camilaUser = await prisma.user.upsert({
-    where: { email: "camila@agendamentos.com" },
-    update: { name: "Dra. Camila Rocha", status: "Ativo" },
-    create: {
-      name: "Dra. Camila Rocha",
-      email: "camila@agendamentos.com",
-      phone: "(11) 98888-0003",
-      password: adminPasswordHash,
-      status: "Ativo",
-      initials: "CR",
-      last: "Hoje",
-    },
-  });
-
-  const funcUser = await prisma.user.upsert({
-    where: { email: "func@agendamentos.com" },
-    update: { name: "Mariana Costa", status: "Ativo" },
-    create: {
-      name: "Mariana Costa",
-      email: "func@agendamentos.com",
-      phone: "(11) 90000-0003",
-      password: adminPasswordHash,
-      status: "Ativo",
-      initials: "MC",
-      last: "Hoje",
-    },
-  });
-
-  const users = [adminUser, gabrielUser, julianaUser, camilaUser, funcUser];
 
   // 3. Serviços
   console.log("\n3. Criando Serviços...");
@@ -222,7 +182,6 @@ async function main() {
   const timeSlots = ["08:30", "09:15", "10:00", "10:45", "11:30", "13:30", "14:30", "15:15", "16:00", "17:00", "18:00"];
   const channels = ["digital", "whatsapp", "presencial", "telefone"];
   const weightedServiceIndices = [0, 0, 0, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 5, 6, 7];
-  const weightedUserIndices = [0, 0, 1, 1, 1, 2, 2, 3, 3, 4];
 
   let apptCount = 0;
   for (let dayOffset = 90; dayOffset >= 0; dayOffset--) {
@@ -245,7 +204,7 @@ async function main() {
 
       const client = createdClients[Math.floor(Math.random() * createdClients.length)];
       const service = createdServices[weightedServiceIndices[Math.floor(Math.random() * weightedServiceIndices.length)]];
-      const user = users[weightedUserIndices[Math.floor(Math.random() * weightedUserIndices.length)]];
+      const user = adminUser;
       const channelId = channels[Math.floor(Math.random() * channels.length)];
 
       let status = "Concluído";
@@ -298,7 +257,7 @@ async function main() {
     const salesForDay = Math.floor(Math.random() * 4) + 2;
     for (let k = 0; k < salesForDay; k++) {
       const prod = createdProducts[Math.floor(Math.random() * createdProducts.length)];
-      const user = users[Math.floor(Math.random() * users.length)];
+      const user = adminUser;
       const quantity = Math.floor(Math.random() * 3) + 1;
       const totalPrice = Number((prod.price * quantity).toFixed(2));
       const paymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];

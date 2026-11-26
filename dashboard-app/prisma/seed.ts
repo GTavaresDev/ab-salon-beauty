@@ -2,15 +2,18 @@ import { PrismaClient } from "@prisma/client";
 import { config } from "dotenv";
 import { resolve } from "node:path";
 import { hashPassword } from "@core/server/auth/password";
+import { requireSeedPasswords } from "@core/server/rule/seed-password.business-rule";
 
 config({ path: resolve(process.cwd(), "..", ".env.local"), override: true });
 
 const prisma = new PrismaClient();
 
 const ADMIN_ID = "bb323bc0-f216-4309-8ef5-db9ea664e845";
-const EMPLOYEE_ID = "user-mariana-costa";
 
 async function main() {
+  const seedPasswords = requireSeedPasswords(process.env, ["SEED_ADMIN_PASSWORD"]);
+  const adminPassword = await hashPassword(seedPasswords.SEED_ADMIN_PASSWORD);
+
   console.log("=== Limpando Banco de Dados ===");
 
   await prisma.sale.deleteMany({});
@@ -77,9 +80,6 @@ async function main() {
   });
 
   console.log("\n3. Criando Usuários (Funcionários / Profissionais)...");
-  const defaultPassword = await hashPassword("zxcasd");
-  const adminPassword = await hashPassword("lkjh-poiu-zxc10");
-
   await prisma.user.create({
     data: {
       id: ADMIN_ID,
@@ -94,25 +94,8 @@ async function main() {
     },
   });
 
-  await prisma.user.create({
-    data: {
-      id: EMPLOYEE_ID,
-      name: "Mariana Costa",
-      email: "func@agendamentos.com",
-      phone: "(11) 90000-0003",
-      password: defaultPassword,
-      status: "Ativo",
-      initials: "MC",
-      last: "Hoje",
-      failedLoginAttempts: 0,
-    },
-  });
-
   await prisma.userPermission.createMany({
-    data: [
-      { userId: ADMIN_ID, name: "Product Manegar" },
-      { userId: EMPLOYEE_ID, name: "Usuario" },
-    ],
+    data: [{ userId: ADMIN_ID, name: "Product Manegar" }],
   });
 
   console.log("\n4. Criando Catálogo de Serviços...");

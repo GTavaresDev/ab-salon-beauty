@@ -1,5 +1,6 @@
 import { StaffRole, User } from "@core/application/query/interface/user.entity";
 import { UserRepository } from "@core/server/db/repository/user.repository";
+import { assertCanCreateRole } from "@core/server/rule/creatable-roles.business-rule";
 
 export interface CreateUserInput {
   name: string;
@@ -7,6 +8,7 @@ export interface CreateUserInput {
   phone?: string;
   password?: string;
   role?: StaffRole;
+  actorRole?: StaffRole;
   status?: "Ativo" | "Inativo";
   commissionPercent?: number;
 }
@@ -15,6 +17,10 @@ export class CreateUser {
   constructor(private userRepository: UserRepository) {}
 
   async execute(input: CreateUserInput): Promise<User> {
+    const role = input.role ?? "Funcionario";
+    if (!input.actorRole) throw new Error("Operação não permitida");
+    assertCanCreateRole(input.actorRole, role);
+
     const existing = await this.userRepository.findByEmail(input.email);
     if (existing) {
       throw new Error("Já existe um usuário cadastrado com este e-mail.");
@@ -27,7 +33,7 @@ export class CreateUser {
       email: input.email.trim().toLowerCase(),
       phone: input.phone || "",
       password: input.password || null,
-      role: input.role || "Funcionario",
+      role,
       status: input.status || "Ativo",
       last: "Recém criado",
       initials,

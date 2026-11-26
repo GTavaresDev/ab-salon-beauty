@@ -17,9 +17,9 @@ export function resolvePermissionLevel(
   return 3;
 }
 
-export function roleFromPermissionLevel(level: 0 | 1 | 2 | 3): StaffRole {
-  if (level === 0) return "Dono";
+export function roleFromPermissionLevel(level: number): StaffRole {
   if (level === 1) return "Administrador";
   if (level === 2) return "Gestor";
-  return "Funcionario";
+  if (level === 3) return "Funcionario";
+  throw new Error("Operação não permitida");
 }

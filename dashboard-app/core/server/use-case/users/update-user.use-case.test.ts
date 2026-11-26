@@ -47,4 +47,14 @@ describe("UpdateUser", () => {
     expect(result.lockedUntil).toBeNull();
     expect(result.last).toBeNull();
   });
+
+  it("rejects a role escalation before writing", async () => {
+    const repo = mockUserRepository();
+    const useCase = new UpdateUser(repo);
+
+    await expect(useCase.execute({ id: "u1", role: "Gestor", actorRole: "Gestor" }))
+      .rejects.toThrow("Operação não permitida");
+    expect(repo.findById).not.toHaveBeenCalled();
+    expect(repo.update).not.toHaveBeenCalled();
+  });
 });

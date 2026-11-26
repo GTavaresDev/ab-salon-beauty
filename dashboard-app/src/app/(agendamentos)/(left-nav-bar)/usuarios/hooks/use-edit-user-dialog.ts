@@ -30,12 +30,11 @@ export function useEditUserDialog({
   const profileOptions =
     currentUserRole === "Administrador"
       ? [
-          { value: "1", label: "Nível 1 — Administrador (Total)" },
           { value: "2", label: "Nível 2 — Gestor (Intermediário)" },
           { value: "3", label: "Nível 3 — Funcionário (Operacional)" },
         ]
       : currentUserRole === "Gestor"
-        ? [{ value: "2", label: "Nível 2 — Gestor (Intermediário)" }]
+        ? [{ value: "3", label: "Nível 3 — Funcionário (Operacional)" }]
         : [];
   return {
     userError,

@@ -1,6 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const prismaMock = {
+  $executeRaw: vi.fn(),
+  $transaction: vi.fn(async (callback: (tx: typeof prismaMock) => Promise<void>) => callback(prismaMock)),
   service: {
     create: vi.fn(),
     findUnique: vi.fn(),
@@ -61,11 +63,13 @@ describe("PrismaServiceRepository", () => {
     );
   });
 
-  it("delete calls prisma.service.delete with the given id", async () => {
+  it("delete removes the service and its user assignments in one transaction", async () => {
     const repo = new PrismaServiceRepository();
 
     await repo.delete("sv1");
 
     expect(prismaMock.service.delete).toHaveBeenCalledWith({ where: { id: "sv1" } });
+    expect(prismaMock.$transaction).toHaveBeenCalledOnce();
+    expect(prismaMock.$executeRaw).toHaveBeenCalledOnce();
   });
 });

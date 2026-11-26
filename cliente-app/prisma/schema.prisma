@@ -19,6 +19,7 @@ model User {
   initials             String
   failedLoginAttempts  Int              @default(0)
   lockedUntil          DateTime?
+  serviceIds           String[]         @default([])
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
   appointments         Appointment[]

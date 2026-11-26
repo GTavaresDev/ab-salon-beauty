@@ -19,6 +19,7 @@ model User {
   failedLoginAttempts  Int              @default(0)
   lockedUntil          DateTime?
   commissionPercent    Float            @default(0)
+  serviceIds           String[]         @default([])
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
   appointments         Appointment[]

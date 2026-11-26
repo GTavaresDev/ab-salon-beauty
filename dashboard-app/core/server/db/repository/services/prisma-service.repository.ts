@@ -87,8 +87,12 @@ export class PrismaServiceRepository implements ServiceRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await prisma.service.delete({
-      where: { id },
+    await prisma.$transaction(async (tx) => {
+      await tx.service.delete({ where: { id } });
+      await tx.$executeRaw`
+        UPDATE "Users"
+        SET "serviceIds" = array_remove("serviceIds", ${id}), "updatedAt" = NOW()
+        WHERE ${id} = ANY("serviceIds")`;
     });
     await invalidate(...SERVICE_KEYS);
   }

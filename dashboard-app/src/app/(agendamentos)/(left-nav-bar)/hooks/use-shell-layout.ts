@@ -13,6 +13,7 @@ import {
   Settings,
   ShoppingCart,
   Sparkles,
+  ListChecks,
   UserCheck,
   UsersRound,
 } from "lucide-react";
@@ -76,6 +77,12 @@ export function useShellLayout({ children }: { children: ReactNode }) {
       restricted: true,
     },
     {
+      id: "servicos-por-funcionario",
+      label: "Serviço por Funcionário",
+      icon: ListChecks,
+      href: "/servicos-por-funcionario",
+    },
+    {
       id: "vendas",
       label: "Vendas",
       icon: ShoppingCart,
@@ -115,6 +122,7 @@ export function useShellLayout({ children }: { children: ReactNode }) {
   const nav = allNav.filter((item) => {
     if (item.adminOnly && !isAdmin) return false;
     if (item.id === "usuarios" && !hasUsersPermission) return false;
+    if (item.id === "servicos-por-funcionario" && currentUser?.role !== "Gestor" && currentUser?.role !== "Administrador") return false;
     if (item.id === "relatorios" && !hasReportsPermission) return false;
     if (item.id === "clientes" && isFuncionario) return false;
     if (item.id === "comissao" && isFuncionario) return false;
@@ -134,6 +142,9 @@ export function useShellLayout({ children }: { children: ReactNode }) {
   const firstName = currentUser?.name?.split(" ")[0] || "usuário";
 
   const getPageHeader = () => {
+    if (pathname.includes("/servicos-por-funcionario")) {
+      return { title: "Serviço por Funcionário", subtitle: "Defina os serviços realizados por cada funcionário." };
+    }
     if (pathname.includes("/agenda")) {
       return { title: "Agenda Completa", subtitle: "Acompanhe e gerencie todos os compromissos do dia." };
     }

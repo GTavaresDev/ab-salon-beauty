@@ -16,6 +16,7 @@ export interface UserProps {
   createdAt?: Date;
   updatedAt?: Date;
   commissionPercent?: number;
+  serviceIds?: string[];
 }
 
 export class User {

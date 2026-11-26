@@ -1,12 +1,14 @@
 import { User as PrismaUserModel } from "@prisma/client";
 import { StaffRole, User } from "@core/domain/auth/entities/user.entity";
 
-type PrismaUserWithPermissions = PrismaUserModel & { permissions?: unknown[] };
+type PrismaUserWithPermissions = PrismaUserModel & {
+  permissions?: Array<{ name: string; enabled?: boolean }>;
+};
 
-function normalizeRole(role: string): StaffRole {
-  if (role === "Administrador" || role === "Gestor" || role === "Funcionario") {
-    return role;
-  }
+function roleFromPermissions(permissions: Array<{ name: string; enabled?: boolean }> = []): StaffRole {
+  const names = new Set(permissions.filter((p) => p.enabled !== false).map((p) => p.name));
+  if (names.has("Product Manegar") || names.has("Administrador")) return "Administrador";
+  if (names.has("Gestor")) return "Gestor";
   return "Funcionario";
 }
 
@@ -18,7 +20,7 @@ export class UserMapper {
       email: raw.email,
       phone: raw.phone,
       password: raw.password,
-      role: normalizeRole(raw.role),
+      role: roleFromPermissions(raw.permissions),
       status: raw.status as "Ativo" | "Inativo",
       last: raw.last,
       initials: raw.initials,

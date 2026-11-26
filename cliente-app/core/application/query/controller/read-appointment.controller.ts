@@ -4,7 +4,7 @@ import type { ActionResult } from "@core/application/query/http/action";
 import { revalidatePath } from "next/cache";
 import { type ClientAppointmentDTO, type ClientAppointmentsView } from "@core/application/interfaces/appointments/client-appointment";
 import { formatActionError } from "@/lib/action-error-handler";
-import { requireClientSession } from "@/lib/client-session";
+import { ClientAuthRequiredError, requireClientSession } from "@/lib/client-session";
 import { cancelMyAppointmentGateway, getMyAppointmentGateway, getMyAppointmentsGateway } from "@core/application/query/gateway/appointment.gateway";
 import { prisma } from "@core/infrastructure/shared/client";
 
@@ -33,7 +33,8 @@ export async function getPendingReviewsAction(): Promise<PendingAppointmentRevie
         clientId: session.clientId,
         status: "Concluído",
         userId: { not: null },
-        OR: [{ review: null }, { review: { is: { rating: null, dismissedAt: null } } }],
+        // A dispensa da pesquisa no painel da equipe não encerra a avaliação no portal.
+        OR: [{ review: null }, { review: { is: { rating: null } } }],
       },
       select: { id: true, date: true, time: true, user: { select: { name: true } } },
       orderBy: [{ date: "desc" }, { time: "desc" }],
@@ -44,7 +45,13 @@ export async function getPendingReviewsAction(): Promise<PendingAppointmentRevie
       time: appointment.time,
       professionalName: appointment.user?.name ?? null,
     }));
-  } catch {
+  } catch (error) {
+    if (!(error instanceof ClientAuthRequiredError)) {
+      const code = typeof error === "object" && error !== null && "code" in error && typeof error.code === "string"
+        ? error.code
+        : undefined;
+      console.error("Falha na consulta de avaliações pendentes do portal", { code });
+    }
     return [];
   }
 }

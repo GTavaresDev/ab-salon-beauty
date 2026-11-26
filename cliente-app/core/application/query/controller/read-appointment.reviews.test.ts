@@ -10,7 +10,10 @@ const mocks = vi.hoisted(() => ({
   reviewUpdateMany: vi.fn(),
 }));
 
-vi.mock("@/lib/client-session", () => ({ requireClientSession: mocks.requireClientSession }));
+vi.mock("@/lib/client-session", () => ({
+  ClientAuthRequiredError: class extends Error {},
+  requireClientSession: mocks.requireClientSession,
+}));
 vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidatePath }));
 vi.mock("@core/infrastructure/shared/client", () => ({
   prisma: {
@@ -42,7 +45,7 @@ describe("appointment review actions", () => {
     mocks.reviewUpdateMany.mockResolvedValue({ count: 1 });
   });
 
-  it("only queries completed, assigned appointments owned by the signed-in client and excludes dismissed reviews", async () => {
+  it("lists completed, assigned appointments owned by the signed-in client even when staff dismissed the survey", async () => {
     mocks.appointmentFindMany.mockResolvedValue([
       { id: "a-1", date: "2026-11-26", time: "15:00", user: { name: "Mariana" } },
     ]);
@@ -55,7 +58,7 @@ describe("appointment review actions", () => {
         clientId: "client-1",
         status: "Concluído",
         userId: { not: null },
-        OR: [{ review: null }, { review: { is: { rating: null, dismissedAt: null } } }],
+        OR: [{ review: null }, { review: { is: { rating: null } } }],
       }),
       orderBy: [{ date: "desc" }, { time: "desc" }],
     }));

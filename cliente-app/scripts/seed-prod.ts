@@ -3,7 +3,6 @@ import { hashPassword } from "@core/domain/auth/infrastructure/auth/password";
 
 const prodDatabaseUrl =
   process.argv[2] ||
-  process.env.PROD_DATABASE_URL ||
   process.env.DATABASE_URL;
 
 if (!prodDatabaseUrl) {

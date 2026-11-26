@@ -22,13 +22,11 @@ export async function fetchDashboardMetricsAction(): Promise<DashboardMetrics> {
 
 /**
  * Métricas do período. É o caminho mais caro do sistema — quatro tabelas
- * inteiras somadas em memória (~800 ms no Neon) — e é puramente informativo,
- * então tolera a defasagem do TTL de 20 min.
+ * inteiras somadas em memória (~800 ms no Neon).
  *
  * A permissão é conferida AQUI, e não só na página: a página apenas redireciona
  * quem não pode ver, mas a Server Action é chamável direto, e ela devolve
- * faturamento e dados de clientes. A verificação vem antes do cache — o Redis
- * nunca é um caminho alternativo para escapar da autorização.
+ * faturamento e dados de clientes.
  */
 export async function fetchReportMetricsAction(period?: string): Promise<ReportMetrics> {
   const session = await requireSessionAction();
@@ -65,7 +63,6 @@ export async function fetchReportMetricsAction(period?: string): Promise<ReportM
     _avg: { rating: true },
   });
   const scoreByAttendant = new Map(ratings.map((item) => [item.attendantId, item._avg.rating]));
-  // Os relatórios em cache podem ter sido criados antes de `professionals.id` existir.
   const users = await prisma.user.findMany({ select: { id: true, name: true } });
   const userIdByName = new Map(users.map((user) => [user.name, user.id]));
 

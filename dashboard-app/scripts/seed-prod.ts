@@ -4,7 +4,6 @@ import { requireSeedPasswords } from "@core/server/rule/seed-password.business-r
 
 const prodDatabaseUrl =
   process.argv[2] ||
-  process.env.PROD_DATABASE_URL ||
   process.env.DATABASE_URL;
 
 if (!prodDatabaseUrl) {

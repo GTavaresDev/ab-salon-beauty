@@ -3,6 +3,7 @@ import { buildClient, mockClientRepository } from "@core/domain/auth/entities/te
 import type { ClientOAuthAccountRepository } from "@core/domain/auth/repositories/client-oauth-account.repository";
 import type { ClientPasswordResetTokenRepository } from "@core/domain/auth/repositories/client-password-reset-token.repository";
 import { hashPassword, verifyPassword } from "@core/domain/auth/infrastructure/auth/password";
+import input from "../../../../test/mocks/cliente-cadastro.json";
 import {
   AuthenticateClient,
   ClientAccountError,
@@ -28,13 +29,6 @@ function mockResetTokenRepository(): Mocked<ClientPasswordResetTokenRepository> 
     consume: vi.fn().mockResolvedValue(true),
   } as unknown as Mocked<ClientPasswordResetTokenRepository>;
 }
-
-const input = {
-  name: "Maria Silva",
-  email: " Maria@Example.com ",
-  phone: "(11) 99999-9999",
-  password: "senha-super-secreta",
-};
 
 describe("RegisterClientAccount", () => {
   it("cria um novo cliente com senha em hash e e-mail normalizado", async () => {

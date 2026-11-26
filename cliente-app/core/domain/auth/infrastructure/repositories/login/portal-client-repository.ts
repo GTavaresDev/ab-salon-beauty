@@ -6,7 +6,7 @@ const base = new PrismaClientRepository();
 
 /**
  * Memoiza a busca dentro de UMA renderização (React `cache`), não entre
- * requisições — nada disso vai para o Redis.
+ * requisições.
  *
  * `/cliente/painel` monta o estado do cadastro e o status da conta na mesma
  * renderização, e as duas buscavam o mesmo cliente: eram duas idas ao Neon

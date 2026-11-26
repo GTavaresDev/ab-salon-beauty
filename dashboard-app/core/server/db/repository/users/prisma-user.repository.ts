@@ -22,8 +22,7 @@ export class PrismaUserRepository implements UserRepository {
           .filter((user) => user.role === "Gestor" || user.role === "Funcionario");
       }
       const records = await getCached(CacheKeys.users, CacheTTL.users, async () => {
-        // O hash de senha nunca entra no Redis. Quem autentica é findByEmail,
-        // que não passa por cache — findAll só alimenta listagens.
+        // A listagem não expõe o hash de senha.
         const rows = await this.db.user.findMany({
           omit: { password: true },
           include: { permissions: { where: { enabled: true } } },

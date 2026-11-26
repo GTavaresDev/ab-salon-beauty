@@ -3,7 +3,6 @@ import { createSaleGateway } from "@core/server/gateway/sale.gateway";
 import { prisma } from "./postgres-local";
 
 vi.mock("@core/server/db/prisma", () => import("./postgres-local"));
-vi.mock("@core/server/cache/redis", () => ({ redis: null, isCacheEnabled: false }));
 
 const sale = createSaleGateway().create;
 const sell = (productId: string) => sale.execute({ productId, quantity: 2, unitPrice: 1, paymentMethod: "Pix" });

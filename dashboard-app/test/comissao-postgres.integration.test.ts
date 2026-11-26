@@ -10,7 +10,6 @@ import type { AppointmentProps } from "@core/application/query/interface/appoint
 import { prisma } from "./postgres-local";
 
 vi.mock("@core/server/db/prisma", () => import("./postgres-local"));
-vi.mock("@core/server/cache/redis", () => ({ redis: null, isCacheEnabled: false }));
 vi.mock("@core/application/query/controller/users/user.controller", () => ({ fetchUsersAction: async () => [] }));
 vi.mock("@/app/(agendamentos)/(left-nav-bar)/agenda/hooks/use-appointments", () => ({
   useAppointments: () => ({ appointmentList: rows, isLoading: false }),

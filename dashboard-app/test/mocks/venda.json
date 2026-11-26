@@ -1,0 +1,7 @@
+{
+  "productId": "p1",
+  "quantity": 2,
+  "paymentMethod": "Pix",
+  "catalogPrice": 19.5,
+  "totalPrice": 39
+}

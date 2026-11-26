@@ -86,6 +86,11 @@ O Usuario NÃO vê:
    antes de devolver dados.
 5. Permissões complementares, como acesso a relatórios, também pertencem ao
    próprio usuário em `UserPermissions`.
+6. Senhas de novos usuários — e novas senhas definidas posteriormente — devem
+   ter no mínimo 10 caracteres, uma letra maiúscula, um número e um caractere
+   especial. Senhas já cadastradas não devem ser alteradas automaticamente.
+   No cadastro de usuário, todos os requisitos devem aparecer abaixo do campo
+   de senha em vermelho e mudar para verde conforme forem atendidos.
 
 ## 4. Checklist rápido para o agente
 

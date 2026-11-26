@@ -1,7 +1,7 @@
 "use client";
 
 import { useCreateUserDialog } from "../hooks/use-create-user-dialog";
-import { X } from "lucide-react";
+import { CheckCircle2, Circle, X } from "lucide-react";
 import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/button.component";
 import {
   Card,
@@ -15,6 +15,7 @@ import { FieldLabel } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/f
 import { UserProps } from "@core/application/query/interface/user.entity";
 import type { StaffRole } from "@core/application/query/interface/user.entity";
 import { formatPhoneBR } from "@/lib/input-masks";
+import { getUserPasswordRequirements } from "@core/shared/user-password-policy";
 
 export function CreateUserDialog({
   userList,
@@ -40,6 +41,8 @@ export function CreateUserDialog({
     loading,
     phoneValue,
     setPhoneValue,
+    password,
+    setPassword,
     addUser,
   } = useCreateUserDialog({ userList, currentUserRole, onAddUser, onClose, showToast });
 
@@ -63,6 +66,7 @@ export function CreateUserDialog({
             onClick={() => {
               onClose();
               setPhoneValue("");
+              setPassword("");
             }}
           >
             <X />
@@ -84,8 +88,27 @@ export function CreateUserDialog({
                 name="password"
                 type="password"
                 required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="Digite uma senha segura..."
               />
+              <ul className="mt-2 space-y-1" aria-live="polite">
+                {getUserPasswordRequirements(password).map((requirement) => (
+                  <li
+                    key={requirement.id}
+                    className={`flex items-center gap-1.5 text-xs ${
+                      requirement.met ? "text-emerald-600" : "text-red-600"
+                    }`}
+                  >
+                    {requirement.met ? (
+                      <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                    ) : (
+                      <Circle className="size-3.5" aria-hidden="true" />
+                    )}
+                    {requirement.label}
+                  </li>
+                ))}
+              </ul>
             </div>
             <div>
               <FieldLabel>Telefone</FieldLabel>
@@ -126,6 +149,7 @@ export function CreateUserDialog({
                 onClick={() => {
                   onClose();
                   setPhoneValue("");
+                  setPassword("");
                 }}
               >
                 Cancelar

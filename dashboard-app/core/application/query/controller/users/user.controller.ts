@@ -5,6 +5,7 @@ import type { ActionResult } from "@core/application/query/interface/action.inte
 import { roleFromPermissionLevel } from "@core/server/rule/resolve-permission-level.business-rule";
 import { StaffRole, UserProps } from "@core/application/query/interface/user.entity";
 import { hashPassword } from "@core/server/auth/password";
+import { isValidUserPassword, userPasswordPolicyMessage } from "@core/shared/user-password-policy";
 import { requireSessionAction } from "@core/application/query/controller/users/auth.controller";
 import { formatActionError } from "@/lib/action-error-handler";
 
@@ -73,6 +74,9 @@ export async function createUserAction(input: {
     }
 
     const mappedRole: StaffRole = roleFromPermissionLevel(level);
+    if (!input.password || !isValidUserPassword(input.password)) {
+      return { success: false, error: userPasswordPolicyMessage };
+    }
     const encryptedPassword = input.password
       ? await hashPassword(input.password)
       : undefined;
@@ -170,6 +174,9 @@ export async function updateUserAction(input: {
           success: false,
           error: "A nova senha e a confirmação de senha não coincidem.",
         };
+      }
+      if (!isValidUserPassword(input.password)) {
+        return { success: false, error: userPasswordPolicyMessage };
       }
 
       // For password updates, strictly require the actual password stored in the database.

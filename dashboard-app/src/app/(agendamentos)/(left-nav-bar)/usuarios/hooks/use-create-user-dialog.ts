@@ -24,6 +24,7 @@ export function useCreateUserDialog({
 }) {
   const [loading, setLoading] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
+  const [password, setPassword] = useState("");
 
   async function addUser(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -41,6 +42,7 @@ export function useCreateUserDialog({
 
       onClose();
       setPhoneValue("");
+      setPassword("");
       showToast("Novo usuário adicionado com sucesso");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Erro ao adicionar usuário";
@@ -53,6 +55,8 @@ export function useCreateUserDialog({
     loading,
     phoneValue,
     setPhoneValue,
+    password,
+    setPassword,
     addUser,
   };
 }

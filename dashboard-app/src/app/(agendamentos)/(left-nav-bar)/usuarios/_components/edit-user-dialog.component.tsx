@@ -114,8 +114,7 @@ export function EditUserDialog({
               if (res.success && res.data) {
                 onUserUpdated(res.data);
                 showToast(`Usuário ${name} atualizado com sucesso no banco!`);
-                onClose();
-                setPhoneValue("");
+                handleClose();
               } else {
                 const err = res.error || "Erro ao atualizar usuário.";
                 setUserError(err);

@@ -154,7 +154,6 @@ export function UsersView() {
           canEditPermissions={canEditPermissions(editingUser)}
           onUserUpdated={(updated) => {
             handleReplaceUser(updated);
-            setEditingUser(updated);
           }}
           onClose={() => {
             setEditingUser(null);

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 import { useClientsTable } from "../hooks/use-clients-table";
 import { ChevronDown, MoreVertical, Pencil, Power, Trash2, UserCheck } from "lucide-react";
 import { Avatar } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/avatar.component";
@@ -10,7 +12,6 @@ import {
   getLastAppointmentForClient,
 } from "@/lib/client-appointments";
 import { ClientProps } from "@core/application/query/interface/client.entity";
-import { shouldOpenActionMenuUp } from "@/lib/action-menu-placement";
 import { AppointmentProps } from "@core/application/query/interface/appointment.entity";
 
 export function ClientsTable({
@@ -42,6 +43,35 @@ export function ClientsTable({
     openMenuId,
     setOpenMenuId,
   } = useClientsTable({ clients, filteredCount, statusFilter, onStatusFilterChange, appointmentList, page, onPageChange, onEdit, onToggleStatus, onDelete });
+  const [menuPosition, setMenuPosition] = useState<{ top: number; right: number } | null>(null);
+  const openClient = clients.find((client) => client.id === openMenuId);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    const closeMenu = () => setOpenMenuId(null);
+    window.addEventListener("scroll", closeMenu, true);
+    window.addEventListener("resize", closeMenu);
+    return () => {
+      window.removeEventListener("scroll", closeMenu, true);
+      window.removeEventListener("resize", closeMenu);
+    };
+  }, [openMenuId, setOpenMenuId]);
+
+  function toggleActionMenu(client: ClientProps, event: MouseEvent<HTMLButtonElement>) {
+    if (openMenuId === client.id) {
+      setOpenMenuId(null);
+      return;
+    }
+    const button = event.currentTarget.getBoundingClientRect();
+    const menuHeight = 128;
+    const gap = 8;
+    const openUp = window.innerHeight - button.bottom < menuHeight + gap && button.top >= menuHeight + gap;
+    setMenuPosition({
+      top: openUp ? button.top - menuHeight - gap : button.bottom + gap,
+      right: Math.max(gap, window.innerWidth - button.right),
+    });
+    setOpenMenuId(client.id || null);
+  }
 
   return (
     <Card className="overflow-visible">
@@ -79,7 +109,7 @@ export function ClientsTable({
         <span>Último agendamento</span>
         <span />
       </div>
-      <div className="max-h-85 overflow-y-auto divide-y divide-zinc-100 min-h-65">        {clients.map((client, itemIndex) => {
+      <div className="max-h-85 overflow-y-auto divide-y divide-zinc-100 min-h-65">        {clients.map((client) => {
           const lastAppointment = getLastAppointmentForClient(
             appointmentList,
             client,
@@ -94,48 +124,14 @@ export function ClientsTable({
             <div className="relative">
               <button
                 type="button"
-                onClick={() =>
-                  setOpenMenuId(openMenuId === client.id ? null : client.id || null)
-                }
+                onClick={(event) => toggleActionMenu(client, event)}
+                aria-label={`Ações de ${client.name}`}
+                aria-haspopup="menu"
+                aria-expanded={openMenuId === client.id}
                 className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-black transition-colors"
               >
                 <MoreVertical className="size-4" />
               </button>
-              {openMenuId === client.id && (
-                <div className={`absolute right-0 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl ${shouldOpenActionMenuUp(itemIndex, clients.length) ? "bottom-8" : "top-8"}`}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onEdit(client);
-                      setOpenMenuId(null);
-                    }}
-                    className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors"
-                  >
-                    <Pencil className="size-4 shrink-0 text-zinc-500" /> Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      await onToggleStatus(client);
-                      setOpenMenuId(null);
-                    }}
-                    className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors"
-                  >
-                    <Power className="size-4 shrink-0 text-zinc-500" /> Status
-                  </button>
-                  <div className="my-1 h-px bg-zinc-100" />
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      await onDelete(client);
-                      setOpenMenuId(null);
-                    }}
-                    className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 className="size-4 shrink-0 text-red-500" /> Excluir
-                  </button>
-                </div>
-              )}
             </div>
           );
 
@@ -233,6 +229,29 @@ export function ClientsTable({
           </div>
         )}
       </div>
+      {openClient && menuPosition && createPortal(
+        <div
+          role="menu"
+          aria-label={`Ações de ${openClient.name}`}
+          className="fixed z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl"
+          style={menuPosition}
+        >
+          <button type="button" role="menuitem" onClick={() => { onEdit(openClient); setOpenMenuId(null); }}
+            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors">
+            <Pencil className="size-4 shrink-0 text-zinc-500" /> Editar
+          </button>
+          <button type="button" role="menuitem" onClick={async () => { await onToggleStatus(openClient); setOpenMenuId(null); }}
+            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors">
+            <Power className="size-4 shrink-0 text-zinc-500" /> Status
+          </button>
+          <div className="my-1 h-px bg-zinc-100" />
+          <button type="button" role="menuitem" onClick={async () => { await onDelete(openClient); setOpenMenuId(null); }}
+            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
+            <Trash2 className="size-4 shrink-0 text-red-500" /> Excluir
+          </button>
+        </div>,
+        document.body,
+      )}
     </Card>
   );
 }

@@ -46,13 +46,16 @@ describe("PrismaClientRepository", () => {
     await expect(repo.findByEmail("x@example.com")).rejects.toThrow(error);
   });
 
-  it("findAll orders by name and maps to domain", async () => {
+  it("findAll excludes clients awaiting portal approval and maps to domain", async () => {
     prismaMock.client.findMany.mockResolvedValue([rawClient]);
     const repo = new PrismaClientRepository();
 
     const result = await repo.findAll();
 
-    expect(prismaMock.client.findMany).toHaveBeenCalledWith(expect.objectContaining({ orderBy: { name: "asc" } }));
+    expect(prismaMock.client.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { portalAccess: { not: "IN_REVIEW" } },
+      orderBy: { name: "asc" },
+    }));
     expect(result[0].id).toBe("c1");
   });
 

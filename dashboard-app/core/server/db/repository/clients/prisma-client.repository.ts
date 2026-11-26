@@ -49,6 +49,7 @@ export class PrismaClientRepository implements ClientRepository {
     try {
       const list = await getCached(CacheKeys.clients, CacheTTL.clients, () =>
         prisma.client.findMany({
+          where: { portalAccess: { not: "IN_REVIEW" } },
           orderBy: { name: "asc" },
           select: {
             id: true,

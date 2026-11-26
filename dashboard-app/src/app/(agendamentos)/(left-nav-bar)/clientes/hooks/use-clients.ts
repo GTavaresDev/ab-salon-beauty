@@ -14,6 +14,7 @@ import { useAppShell } from "@/stores/app-shell.store";
 export interface ClientsContextType {
   clientList: ClientProps[];
   isLoading: boolean;
+  refreshClients: () => Promise<void>;
   handleAddClient: (client: {
     name: string;
     email: string;
@@ -31,6 +32,11 @@ export function useClientsState(): ClientsContextType {
   const { currentUser, showToast } = useAppShell();
   const [clientList, setClientList] = useState<ClientProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  async function refreshClients() {
+    const clients = await fetchClientsAction();
+    setClientList(clients);
+  }
 
   useEffect(() => {
     if (!currentUser) return;
@@ -92,7 +98,7 @@ export function useClientsState(): ClientsContextType {
     }
   }
 
-  return { clientList, isLoading, handleAddClient, handleReplaceClient, handleUpdateClient, handleDeleteClient };
+  return { clientList, isLoading, refreshClients, handleAddClient, handleReplaceClient, handleUpdateClient, handleDeleteClient };
 }
 
 export function useClients() {

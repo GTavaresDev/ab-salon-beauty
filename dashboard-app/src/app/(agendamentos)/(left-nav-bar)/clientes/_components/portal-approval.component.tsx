@@ -8,6 +8,7 @@ import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/butto
 
 import type { pendingPortalClients } from "@core/application/query/controller/clients/portal-approval.controller";
 import { formatPhoneBR } from "@/lib/input-masks";
+import { useClients } from "../hooks/use-clients";
 
 const dateFormat = new Intl.DateTimeFormat("pt-BR", {
   dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo",
@@ -15,6 +16,7 @@ const dateFormat = new Intl.DateTimeFormat("pt-BR", {
 
 export function PortalApproval({ clients }: { clients: Awaited<ReturnType<typeof pendingPortalClients>> }) {
   const router = useRouter();
+  const { refreshClients } = useClients();
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -25,6 +27,13 @@ export function PortalApproval({ clients }: { clients: Awaited<ReturnType<typeof
     try {
       const result = await approvePortalClient(id);
       setMessage(result.success ? "Acesso aprovado." : result.error || "Não foi possível aprovar.");
+      if (result.success) {
+        try {
+          await refreshClients();
+        } catch {
+          setMessage("Acesso aprovado. Atualize a página para ver o cliente na base.");
+        }
+      }
       router.refresh();
     } catch {
       setMessage("Não foi possível aprovar. Atualize a página e tente novamente.");
@@ -72,7 +81,7 @@ export function PortalApproval({ clients }: { clients: Awaited<ReturnType<typeof
                   ["E-mail", client.email || "Não informado"],
                   ["Telefone", client.phone ? formatPhoneBR(client.phone) : "Não informado"],
                   ["Data de nascimento", client.birthDate || "Não informada"],
-                  ["Status do cliente", client.status],
+                  ["Situação do cadastro", "Aguardando aprovação"],
                   ["Acesso ao portal", "Em análise"],
                   ["Cadastrado em", dateFormat.format(new Date(client.createdAt))],
                   ["Última atualização", dateFormat.format(new Date(client.updatedAt))],

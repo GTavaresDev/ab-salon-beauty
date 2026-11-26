@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeEach, expect, it, vi } from "vitest";
 import { prisma } from "./postgres-local";
 import { approvePortalClient, pendingPortalClients } from "@core/application/query/controller/clients/portal-approval.controller";
+import { fetchClientsAction } from "@core/application/query/controller/clients/client.controller";
 
 const authState = vi.hoisted(() => ({
   userId: null as string | null,
@@ -86,7 +87,13 @@ it("Gestor e Administrador (Product Manager) aprovam cadastro ativo em análise 
   expect(listedIds).not.toContain(waiting);
   expect(listedIds).not.toContain(inactive);
 
+  const beforeApproval = (await fetchClientsAction()).map((client) => client.id);
+  expect(beforeApproval).not.toContain(c1);
+  expect(beforeApproval).not.toContain(c2);
+  expect(beforeApproval).toContain(waiting);
+
   expect(await approvePortalClient(c1)).toEqual({ success: true });
+  expect((await fetchClientsAction()).map((client) => client.id)).toContain(c1);
   const approved1 = await prisma.client.findUniqueOrThrow({ where: { id: c1 } });
   expect(approved1.portalAccess).toBe("APPROVED");
   expect(approved1.portalApprovedById).toBe(gestorId);

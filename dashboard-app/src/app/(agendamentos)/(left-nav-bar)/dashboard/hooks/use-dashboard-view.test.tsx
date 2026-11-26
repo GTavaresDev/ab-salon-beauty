@@ -5,9 +5,9 @@ import type { AppointmentProps } from "@core/application/query/interface/appoint
 import { dismissPendingNotification } from "../lib/pending-notification-storage";
 import { useDashboardView } from "./use-dashboard-view";
 
-const { useAppointments } = vi.hoisted(() => ({ useAppointments: vi.fn() }));
+const { useAppointments, useAppShell } = vi.hoisted(() => ({ useAppointments: vi.fn(), useAppShell: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock("@/stores/app-shell.store", () => ({ useAppShell: () => ({}) }));
+vi.mock("@/stores/app-shell.store", () => ({ useAppShell }));
 vi.mock("@/app/(agendamentos)/(left-nav-bar)/agenda/hooks/use-appointments", () => ({ useAppointments }));
 vi.mock("@/app/(agendamentos)/(left-nav-bar)/clientes/hooks/use-clients", () => ({
   useClients: () => ({ clientList: [] }),
@@ -23,6 +23,7 @@ const pending: AppointmentProps = {
 
 beforeEach(() => {
   window.sessionStorage.clear();
+  useAppShell.mockReturnValue({ currentUser: { role: "Funcionario" } });
   useAppointments.mockReturnValue({ appointmentList: [] });
 });
 
@@ -61,5 +62,18 @@ it("mantém o alerta fechado quando o último agendamento sai da espera", () => 
   useAppointments.mockReturnValue({ appointmentList: [{ ...pending, status: "Confirmado" }] });
   dashboard.rerender();
 
+  expect(dashboard.result.current.isPendingModalOpen).toBe(false);
+});
+
+it("mantém o alerta fechado para administradores mesmo com agendamentos aguardando", () => {
+  useAppointments.mockReturnValue({ appointmentList: [pending] });
+  useAppShell.mockReturnValue({ currentUser: null });
+  const dashboard = renderHook(useDashboardView);
+  expect(dashboard.result.current.isPendingModalOpen).toBe(false);
+
+  useAppShell.mockReturnValue({ currentUser: { role: "Administrador" } });
+  dashboard.rerender();
+
+  expect(dashboard.result.current.pendingAppointments).toEqual([pending]);
   expect(dashboard.result.current.isPendingModalOpen).toBe(false);
 });

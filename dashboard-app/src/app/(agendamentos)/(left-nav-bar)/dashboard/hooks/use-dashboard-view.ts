@@ -111,7 +111,7 @@ export function useDashboardView() {
     setOpenMenuId,
     onlyPending,
     setOnlyPending,
-    isPendingModalOpen: pendingAppointments.length > 0 && !dismissedOnThisVisit,
+    isPendingModalOpen: Boolean(currentUser && currentUser.role !== "Administrador" && pendingAppointments.length > 0 && !dismissedOnThisVisit),
     onNew,
     onVerAgenda,
     appointments,

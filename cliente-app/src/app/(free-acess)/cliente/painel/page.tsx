@@ -33,7 +33,8 @@ export default async function ClientHomePage() {
     );
   }
 
-  const { next } = await getMyAppointmentsController();
+  const appointments = await getMyAppointmentsController();
+  const next = appointments.data?.next;
 
   return (
     <PortalShell
@@ -57,7 +58,11 @@ export default async function ClientHomePage() {
       <section className="mt-8">
         <h2 className="mb-3 text-sm font-semibold text-zinc-700">Seu próximo atendimento</h2>
 
-        {next ? (
+        {!appointments.success ? (
+          <p role="alert" className="rounded-2xl border border-zinc-200 bg-white p-5 text-sm text-zinc-700">
+            {appointments.error}
+          </p>
+        ) : next ? (
           <Link
             href={`/cliente/painel/meus-agendamentos/${next.id}`}
             className="block rounded-2xl border border-zinc-200 bg-white p-5 transition hover:border-zinc-300"

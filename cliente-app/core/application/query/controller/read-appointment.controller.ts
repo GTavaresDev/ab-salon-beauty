@@ -11,10 +11,16 @@ import { prisma } from "@core/infrastructure/shared/client";
 export type PendingAppointmentReview = { appointmentId: string; date: string; time: string; professionalName: string | null };
 
 /** Só os agendamentos do cliente autenticado — o filtro é da consulta. */
-export async function getClientAppointmentsAction(): Promise<ClientAppointmentsView> {
+export async function getClientAppointmentsAction(): Promise<ActionResult<ClientAppointmentsView>> {
   const result = await getMyAppointmentsGateway();
-  if (result.tag === "left") throw new Error(result.value.message);
-  return result.value;
+  if (result.tag === "left") {
+    console.error("Falha na consulta de agendamentos do portal", {
+      code: result.value.code,
+      statusCode: result.value.statusCode,
+    });
+    return { success: false, error: "Não foi possível carregar seus agendamentos. Tente novamente em instantes." };
+  }
+  return { success: true, data: result.value };
 }
 
 export const getMyAppointmentsController = getClientAppointmentsAction;

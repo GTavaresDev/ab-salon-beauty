@@ -18,7 +18,17 @@ export const metadata: Metadata = {
 
 export default async function MyAppointmentsPage() {
   const session = await requireCompletePortalSession();
-  const { upcoming, past } = await getMyAppointmentsController();
+  const appointments = await getMyAppointmentsController();
+  if (!appointments.success || !appointments.data) {
+    return (
+      <PortalShell session={session} title="Meus agendamentos">
+        <p role="alert" className="rounded-2xl border border-zinc-200 bg-white p-5 text-sm text-zinc-700">
+          {appointments.error}
+        </p>
+      </PortalShell>
+    );
+  }
+  const { upcoming, past } = appointments.data;
 
   return (
     <PortalShell

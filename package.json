@@ -1,0 +1,26 @@
+{
+  "name": "ab-salon-beauty",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "npm@11.13.0",
+  "workspaces": [
+    "cliente-app",
+    "dashboard-app",
+    "site",
+    "server"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "dependencies": {
+    "@neon/config": "^1.14.8",
+    "@neon/env": "^2.1.11",
+    "turbo": "^2.11.13"
+  },
+  "devDependencies": {
+    "dotenv": "^18.0.10"
+  }
+}

@@ -1,0 +1,32 @@
+import { vi, type Mocked } from "vitest";
+import { Appointment, type AppointmentProps } from "@core/application/query/interface/appointment.entity";
+import type { AppointmentRepository } from "@core/server/db/repository/appointment.repository";
+
+export function buildAppointment(overrides: Partial<AppointmentProps> = {}): Appointment {
+  return new Appointment({
+    id: "a1",
+    date: "2026-08-06",
+    time: "09:00",
+    name: "Maria Silva",
+    service: "Corte",
+    duration: "30 min",
+    status: "Confirmado",
+    initials: "MS",
+    channelId: "site",
+    ...overrides,
+  });
+}
+
+export function mockAppointmentRepository(): Mocked<AppointmentRepository> {
+  return {
+    findAll: vi.fn(),
+    findByDate: vi.fn(),
+    findByDateRange: vi.fn(),
+    findById: vi.fn(),
+    findByClientId: vi.fn(),
+    findByIdAndClientId: vi.fn(),
+    save: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+  } as unknown as Mocked<AppointmentRepository>;
+}

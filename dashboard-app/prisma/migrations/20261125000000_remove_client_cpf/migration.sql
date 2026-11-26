@@ -1,0 +1,1 @@
+ALTER TABLE "Clients" DROP COLUMN IF EXISTS "cpf";

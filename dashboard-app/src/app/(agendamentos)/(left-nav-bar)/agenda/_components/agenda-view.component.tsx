@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
+
 import { useAgendaView } from "../hooks/use-agenda-view";
 import {
   CalendarDays,
@@ -31,7 +34,6 @@ import { getStatusBadgeVariant } from "@/lib/appointment-status";
 import { AppointmentProps } from "@core/application/query/interface/appointment.entity";
 import { appointmentAttendantLabel } from "@/lib/appointment-attendant";
 import { PendingAppointmentsModal } from "@/app/(agendamentos)/(left-nav-bar)/dashboard/_components/pending-appointments-modal.component";
-import { shouldOpenActionMenuUp } from "@/lib/action-menu-placement";
 
 const agendaColumns =
   "grid-cols-[3.5rem_minmax(0,1.5fr)_minmax(0,1.15fr)_minmax(0,1.35fr)_minmax(0,0.75fr)_minmax(0,1.25fr)_2.75rem]";
@@ -85,6 +87,46 @@ export function AgendaView({
     pagedAppointments,
     channelMap,
   } = useAgendaView({ appointments, onStatusChange, onNew, showToast, currentUserRole, currentUserName, currentUserId, userList });
+
+  const [menuPosition, setMenuPosition] = useState<CSSProperties | null>(null);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    const close = () => setOpenMenuId(null);
+    const closeOnScroll = (event: Event) => {
+      if (!(event.target instanceof HTMLElement) || !event.target.closest("[data-agenda-action-menu]")) close();
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+    };
+    window.addEventListener("scroll", closeOnScroll, true);
+    window.addEventListener("resize", close);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.removeEventListener("scroll", closeOnScroll, true);
+      window.removeEventListener("resize", close);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [openMenuId, setOpenMenuId]);
+
+  function toggleActionMenu(id: string, event: MouseEvent<HTMLButtonElement>) {
+    if (openMenuId === id) {
+      setOpenMenuId(null);
+      return;
+    }
+
+    const button = event.currentTarget.getBoundingClientRect();
+    const gap = 8;
+    const above = button.top - 2 * gap;
+    const below = window.innerHeight - button.bottom - 2 * gap;
+    const openUp = below < 96 && above > below;
+    setMenuPosition({
+      ...(openUp ? { bottom: window.innerHeight - button.top + gap } : { top: button.bottom + gap }),
+      right: Math.max(gap, window.innerWidth - button.right),
+      maxHeight: Math.max(0, openUp ? above : below),
+    });
+    setOpenMenuId(id);
+  }
 
   return (
     <div className="mx-auto max-w-375 p-3 sm:p-5 lg:p-6">
@@ -216,7 +258,7 @@ export function AgendaView({
           </div>
 
           <div className="max-h-105 overflow-y-auto divide-y divide-zinc-100 min-h-65">
-            {pagedAppointments.map((item, itemIndex) => {
+            {pagedAppointments.map((item) => {
               const attendantLabel = appointmentAttendantLabel(item);
               const channelLabel = channelMap.get(item.channelId) || "Sistema";
               const serviceColor = resolveServiceColor(serviceList, item);
@@ -236,75 +278,80 @@ export function AgendaView({
                   (isMine || (!isTargetAdmin && !isTargetGestor))) ||
                 (currentUserRole === "Funcionario" && isMine);
 
-              const actionMenuNode = canEdit ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setOpenMenuId(openMenuId === item.id ? null : item.id)
-                    }
-                    className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-black transition-colors"
-                  >
-                    <MoreVertical className="size-4" />
-                  </button>
-                  {openMenuId === item.id && (
-                    <div className={cn("absolute right-0 z-50 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl", shouldOpenActionMenuUp(itemIndex, pagedAppointments.length) ? "bottom-8" : "top-8")}>
-                      {isPending ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              await onStatusChange(item.id, "Confirmado");
-                              setOpenMenuId(null);
-                            }}
-                            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors"
-                          >
-                            <Check className="size-4 shrink-0 text-emerald-600" /> Confirmar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              await onStatusChange(item.id, "Cancelado");
-                              setOpenMenuId(null);
-                            }}
-                            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-amber-700 hover:bg-amber-50 transition-colors"
-                          >
-                            <X className="size-4 shrink-0 text-amber-600" /> Recusar
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              await onStatusChange(item.id, "Concluído");
-                              setOpenMenuId(null);
-                            }}
-                            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors"
-                          >
-                            <Power className="size-4 shrink-0 text-zinc-500" />{" "}
-                            Concluído
-                          </button>
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              await onStatusChange(item.id, "Cancelado");
-                              setOpenMenuId(null);
-                            }}
-                            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors"
-                          >
-                            <X className="size-4 shrink-0 text-zinc-500" /> Cancelar
-                          </button>
-                        </>
-                      )}
-
-                    </div>
-                  )}
-                </>
+              const actionTrigger = canEdit ? (
+                <button
+                  type="button"
+                  aria-label={`Ações de ${item.name}`}
+                  aria-expanded={openMenuId === item.id}
+                  onClick={(event) => toggleActionMenu(item.id, event)}
+                  className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-black"
+                >
+                  <MoreVertical className="size-4" />
+                </button>
               ) : (
                 <span className="text-[11px] font-medium text-zinc-400">
                   Somente leitura
                 </span>
+              );
+
+              const actionMenu = canEdit && openMenuId === item.id && menuPosition && createPortal(
+                <div
+                  data-agenda-action-menu
+                  aria-label={`Ações de ${item.name}`}
+                  role="group"
+                  className="fixed z-[60] w-44 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl"
+                  style={menuPosition}
+                >
+                  {isPending ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await onStatusChange(item.id, "Confirmado");
+                          setOpenMenuId(null);
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors"
+                      >
+                        <Check className="size-4 shrink-0 text-emerald-600" /> Confirmar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await onStatusChange(item.id, "Cancelado");
+                          setOpenMenuId(null);
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-amber-700 hover:bg-amber-50 transition-colors"
+                      >
+                        <X className="size-4 shrink-0 text-amber-600" /> Recusar
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await onStatusChange(item.id, "Concluído");
+                          setOpenMenuId(null);
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors"
+                      >
+                        <Power className="size-4 shrink-0 text-zinc-500" />{" "}
+                        Concluído
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await onStatusChange(item.id, "Cancelado");
+                          setOpenMenuId(null);
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors"
+                      >
+                        <X className="size-4 shrink-0 text-zinc-500" /> Cancelar
+                      </button>
+                    </>
+                  )}
+                </div>,
+                document.body,
               );
 
               return (
@@ -348,7 +395,7 @@ export function AgendaView({
                       >
                         {statusLabel}
                       </Badge>
-                      <div className="relative">{actionMenuNode}</div>
+                      <div className="relative">{actionTrigger}</div>
                     </div>
                   </div>
 
@@ -417,8 +464,9 @@ export function AgendaView({
 
                   {/* Desktop Column 7: Actions */}
                   <div className="hidden @min-[44rem]/agenda:flex relative justify-end text-right">
-                    {actionMenuNode}
+                    {actionTrigger}
                   </div>
+                  {actionMenu}
                 </div>
               );
             })}

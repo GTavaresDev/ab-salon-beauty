@@ -78,7 +78,7 @@ export function useShellLayout({ children }: { children: ReactNode }) {
     },
     {
       id: "servicos-por-funcionario",
-      label: "Serviço por Funcionário",
+      label: "Serviços por Profissional",
       icon: ListChecks,
       href: "/servicos-por-funcionario",
     },
@@ -143,7 +143,7 @@ export function useShellLayout({ children }: { children: ReactNode }) {
 
   const getPageHeader = () => {
     if (pathname.includes("/servicos-por-funcionario")) {
-      return { title: "Serviço por Funcionário", subtitle: "Defina os serviços realizados por cada funcionário." };
+      return { title: "Serviços por Profissional", subtitle: "Defina os serviços realizados por funcionários e gestores." };
     }
     if (pathname.includes("/agenda")) {
       return { title: "Agenda Completa", subtitle: "Acompanhe e gerencie todos os compromissos do dia." };

@@ -36,8 +36,12 @@ export class AppointmentsController {
   ) {}
 
   @Post()
-  create(@Body() input: CreateAppointmentDto, @CurrentClientAgendaActor() actor: ClientAgendaActor) {
-    if (actor.issuer === 'client') return this.createAppointment.create(clientBooking(input, actor.sub));
+  async create(@Body() input: CreateAppointmentDto, @CurrentClientAgendaActor() actor: ClientAgendaActor) {
+    if (actor.issuer === 'client') {
+      const booking = clientBooking(input, actor.sub);
+      await this.assertProfessionalForService(booking.serviceId, booking.userId);
+      return this.createAppointment.create({ ...booking, professionalName: undefined, professionalEmail: undefined });
+    }
     return this.createAppointment.create({
       ...input,
       userId: input.userId ?? actor.sub,
@@ -107,9 +111,23 @@ export class AppointmentsController {
     if (actor.issuer === 'client') {
       await this.appointmentOwnership.assertOwner(id, actor.sub);
       const changes = clientReschedule(input);
-      return this.updateAppointment.update(id, changes, clientEditableScope(actor.sub));
+      if (changes.statusName === 'Cancelado') {
+        return this.updateAppointment.update(id, changes, clientEditableScope(actor.sub));
+      }
+      await this.assertProfessionalForService(changes.serviceId, changes.userId);
+      return this.updateAppointment.update(id, { ...changes, professionalName: undefined, professionalEmail: undefined }, clientEditableScope(actor.sub));
     }
     return this.updateAppointment.update(id, input, clientAgendaScope(actor));
+  }
+
+  private async assertProfessionalForService(serviceId?: string, userId?: string): Promise<void> {
+    if (typeof serviceId !== 'string' || !serviceId.trim() || typeof userId !== 'string' || !userId.trim()) {
+      throw new BadRequestException('Serviço e profissional são obrigatórios.');
+    }
+    const professionals = await this.getProfessionals.execute(serviceId);
+    if (!professionals.some((professional) => professional.id === userId)) {
+      throw new BadRequestException('Profissional não realiza este serviço.');
+    }
   }
 
   @Delete(':id')

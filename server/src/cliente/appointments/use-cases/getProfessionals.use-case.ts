@@ -32,11 +32,15 @@ export class getProfessionalsUseCase {
     const professionals = await this.dataSource.query(
       `SELECT u.id, u.name, u.initials
        FROM "Users" u
-       LEFT JOIN "UserPermissions" up ON up."userId" = u.id AND up.enabled = true
        WHERE u.status = $1
-         AND (up.name IS NULL OR up.name NOT IN ('Dono', 'Product Manegar', 'Administrador'))
-       ORDER BY u.name ASC`,
-      ['Ativo'],
+         AND $2 = ANY(u."serviceIds")
+         AND NOT EXISTS (
+           SELECT 1 FROM "UserPermissions" up
+           WHERE up."userId" = u.id AND up.enabled = true
+             AND up.name IN ('Dono', 'Product Manegar', 'Administrador')
+         )
+       ORDER BY u.name ASC, u.id ASC`,
+      ['Ativo', serviceId],
     ) as ProfessionalRecord[];
 
     return professionals.map(({ id, name, initials }) => ({ id, name, initials }));

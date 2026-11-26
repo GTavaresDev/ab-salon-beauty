@@ -77,7 +77,7 @@ export function StaffServicesView({ users, services }: { users: StaffServicesEmp
       setAssignments((current) => ({ ...current, [user.id]: result.data! }));
       setEditingUser(null);
       setOpenMenuId(null);
-      showToast("Serviços do funcionário atualizados.");
+      showToast("Serviços do profissional atualizados.");
     } catch (error) {
       showToast(error instanceof Error ? error.message : "Erro ao salvar vínculos.");
     } finally {
@@ -97,7 +97,7 @@ export function StaffServicesView({ users, services }: { users: StaffServicesEmp
         <Input
           value={search}
           onChange={(event) => { setSearch(event.target.value); setPage(1); setOpenMenuId(null); }}
-          placeholder="Buscar funcionário por nome ou e-mail..."
+          placeholder="Buscar profissional por nome ou e-mail..."
           className="pl-9"
         />
       </div>
@@ -106,10 +106,10 @@ export function StaffServicesView({ users, services }: { users: StaffServicesEmp
         <CardHeader className="border-b border-zinc-100 bg-zinc-50/70 p-4 sm:px-6">
           <div className="flex items-center justify-between gap-3">
             <CardTitle className="flex items-center gap-2 text-base font-semibold">
-              <UsersRound className="size-4" /> Serviços por funcionário
+              <UsersRound className="size-4" /> Serviços por profissional
             </CardTitle>
             <Badge variant="outline" className="h-8 shrink-0 px-2.5 text-xs font-normal">
-              {filtered.length} {filtered.length === 1 ? "funcionário" : "funcionários"}
+              {filtered.length} {filtered.length === 1 ? "profissional" : "profissionais"}
             </Badge>
           </div>
         </CardHeader>
@@ -124,7 +124,7 @@ export function StaffServicesView({ users, services }: { users: StaffServicesEmp
             </colgroup>
             <thead>
               <tr className="bg-zinc-50/80 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-                <th scope="col" className="sticky left-0 z-20 min-w-64 border-b border-zinc-200 bg-zinc-50 px-5 py-3">Funcionário</th>
+                <th scope="col" className="sticky left-0 z-20 min-w-64 border-b border-zinc-200 bg-zinc-50 px-5 py-3">Profissional</th>
                 {services.map((service) => (
                   <th key={service.id} scope="col" title={service.name} className="border-b border-zinc-200 px-1 py-3 text-center normal-case tracking-normal">
                     <span className="line-clamp-2">{service.name}</span>
@@ -144,7 +144,10 @@ export function StaffServicesView({ users, services }: { users: StaffServicesEmp
                       <div className="flex items-center gap-3">
                         <Avatar initials={user.initials} className="size-9 shrink-0" />
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-zinc-900">{user.name}</p>
+                          <p className="flex items-center gap-1.5 truncate text-sm font-semibold text-zinc-900">
+                            <span className="truncate">{user.name}</span>
+                            {user.role === "Gestor" && <span className="shrink-0 rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600">Gestor</span>}
+                          </p>
                           <p className="truncate text-[11px] font-normal text-zinc-500">{user.email}</p>
                           <p className="text-[11px] font-normal text-zinc-400">{linkedCount} de {services.length} vinculados</p>
                         </div>
@@ -192,7 +195,7 @@ export function StaffServicesView({ users, services }: { users: StaffServicesEmp
               {paged.length === 0 && (
                 <tr>
                   <td colSpan={services.length + 3} className="px-5 py-12 text-center text-sm text-zinc-500">
-                    Nenhum funcionário encontrado.
+                    Nenhum profissional encontrado.
                   </td>
                 </tr>
               )}
@@ -209,7 +212,7 @@ export function StaffServicesView({ users, services }: { users: StaffServicesEmp
           </div>
         )}
       </Card>
-      <ListPagination page={page} totalItems={filtered.length} onPageChange={(value) => { setPage(value); setOpenMenuId(null); }} label="funcionários" />
+      <ListPagination page={page} totalItems={filtered.length} onPageChange={(value) => { setPage(value); setOpenMenuId(null); }} label="profissionais" />
 
       {menuUser && createPortal(
         <div ref={menuRef} style={{ top: menuPosition.top, left: menuPosition.left }}
@@ -252,7 +255,7 @@ export function StaffServicesView({ users, services }: { users: StaffServicesEmp
               </Button>
             </CardHeader>
             <div className="min-h-0 flex-1 overflow-y-auto p-5">
-              <p className="mb-3 text-xs text-zinc-500">Selecione os serviços realizados pelo funcionário.</p>
+              <p className="mb-3 text-xs text-zinc-500">Selecione os serviços realizados pelo profissional.</p>
               <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-200">
                 {services.length === 0 && <p className="p-4 text-sm text-zinc-500">Nenhum serviço cadastrado.</p>}
                 {services.map((service) => (

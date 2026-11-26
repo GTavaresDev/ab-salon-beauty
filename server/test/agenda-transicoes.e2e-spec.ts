@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { DataSource } from 'typeorm';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { AppointmentsController } from '../src/cliente/appointments/appointments.controller.js';
-import { Appointment, AppointmentStatus } from '../src/cliente/appointments/entities/appointment.entity.js';
+import { Appointment, AppointmentReview, AppointmentStatus } from '../src/cliente/appointments/entities/appointment.entity.js';
 import { AppointmentOwnershipUseCase } from '../src/security/client/appointment-ownership.use-case.js';
 import { createAppointmentUseCase } from '../src/cliente/appointments/use-cases/createAppointment.use-case.js';
 import { updateAppointmentUseCase } from '../src/cliente/appointments/use-cases/updateAppointment.use-case.js';
@@ -19,30 +19,81 @@ if (url.protocol !== 'postgresql:' || url.hostname !== '127.0.0.1' || url.pathna
 }
 const db = new DataSource({ type: 'postgres', url: url.href, entities: [Appointment, AppointmentStatus] });
 const actor = { sub: randomUUID(), issuer: 'client' } as const;
-const input = { date: '2099-09-10', time: '10:00', duration: '30 min', name: 'Cliente fictício', service: 'Teste' };
+const serviceId = randomUUID();
+const userId = randomUUID();
+const unlinkedUserId = randomUUID();
+const adminUserId = randomUUID();
+const managerUserId = randomUUID();
+const input = { date: '2099-09-10', time: '10:00', duration: '30 min', name: 'Cliente fictício', service: 'Teste', serviceId, userId };
 let api: AppointmentsController;
 beforeAll(async () => {
   await db.initialize();
   const repo = db.getRepository(Appointment);
   await db.query('INSERT INTO "Clients" (id,name,email,phone,initials,"updatedAt") VALUES ($1,$2,$3,$4,$5,NOW())',
     [actor.sub, input.name, actor.sub + '@example.invalid', '00000000000', 'CF']);
+  await db.query('INSERT INTO "Services" (id,name,duration,status,"updatedAt") VALUES ($1,$2,$3,$4,NOW())',
+    [serviceId, input.service, 30, 'Ativo']);
+  await db.query('INSERT INTO "Users" (id,name,email,phone,initials,status,"serviceIds","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())',
+    [userId, 'Profissional fictício', userId + '@example.invalid', '00000000000', 'PF', 'Ativo', [serviceId]]);
+  await db.query('INSERT INTO "Users" (id,name,email,phone,initials,status,"serviceIds","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())',
+    [unlinkedUserId, 'Profissional sem vínculo', unlinkedUserId + '@example.invalid', '00000000000', 'PV', 'Ativo', []]);
+  await db.query('INSERT INTO "Users" (id,name,email,phone,initials,status,"serviceIds","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())',
+    [adminUserId, 'Conta administrativa', adminUserId + '@example.invalid', '00000000000', 'CA', 'Ativo', [serviceId]]);
+  await db.query('INSERT INTO "Users" (id,name,email,phone,initials,status,"serviceIds","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())',
+    [managerUserId, 'Gestora fictícia', managerUserId + '@example.invalid', '00000000000', 'GF', 'Ativo', [serviceId]]);
+  await db.query('INSERT INTO "UserPermissions" (name,"userId",enabled,"createdAt","updatedAt") VALUES ($1,$2,true,NOW(),NOW()),($3,$4,true,NOW(),NOW())',
+    ['Product Manegar', adminUserId, 'Gestor', managerUserId]);
   for (const [id, name] of [['status-aguardando','Aguardando confirmação'], ['status-cancelado','Cancelado']]) {
     await db.query('INSERT INTO "AppointmentStatuses" (id,name,"updatedAt") VALUES ($1,$2,NOW()) ON CONFLICT DO NOTHING', [id,name]);
   }
   api = new AppointmentsController(new getAppointmentsByClientUseCase(repo), new getAppointmentsByIdUseCase(repo),
     new deleteAppointmentUseCase(repo), new createAppointmentUseCase(repo, db), new updateAppointmentUseCase(repo, db),
-    new getServicesUseCase(db), new getProfessionalsUseCase(db), new getDateUseCase(db), new AppointmentOwnershipUseCase(repo));
+    new getServicesUseCase(db), new getProfessionalsUseCase(db), new getDateUseCase(db), new AppointmentOwnershipUseCase(repo),
+    repo, db.getRepository(AppointmentReview));
 });
 afterAll(async () => {
   if (!db.isInitialized) return;
   try {
     await db.getRepository(Appointment).delete({ clientId: actor.sub });
+    await db.query('DELETE FROM "Users" WHERE id = ANY($1)', [[userId, unlinkedUserId, adminUserId, managerUserId]]);
+    await db.query('DELETE FROM "Services" WHERE id=$1', [serviceId]);
     await db.query('DELETE FROM "Clients" WHERE id=$1', [actor.sub]);
   } finally { await db.destroy(); }
 });
 
+it('lista profissionais e gestores vinculados, sem a conta administrativa', async () => {
+  expect(await api.findProfessionals(serviceId)).toEqual([
+    { id: managerUserId, name: 'Gestora fictícia', initials: 'GF' },
+    { id: userId, name: 'Profissional fictício', initials: 'PF' },
+  ]);
+});
+
+it('omite o serviço quando nenhum profissional elegível está vinculado', async () => {
+  expect((await api.findServices()).some((service) => service.id === serviceId)).toBe(true);
+  await db.query('UPDATE "Users" SET "serviceIds" = $1 WHERE id = ANY($2)', [[], [userId, managerUserId]]);
+  try {
+    expect((await api.findServices()).some((service) => service.id === serviceId)).toBe(false);
+  } finally {
+    await db.query('UPDATE "Users" SET "serviceIds" = $1 WHERE id = ANY($2)', [[serviceId], [userId, managerUserId]]);
+  }
+});
+
+it('recusa criação e reagendamento com profissional sem vínculo', async () => {
+  await expect(api.create({ ...input, userId: unlinkedUserId }, actor)).rejects.toThrow('Profissional não realiza este serviço.');
+  const row = await api.create(input, actor);
+  await expect(api.update(row.id, undefined, { ...input, userId: unlinkedUserId }, actor)).rejects.toThrow('Profissional não realiza este serviço.');
+  await db.query('UPDATE "Users" SET "serviceIds" = $1 WHERE id = $2', [[], userId]);
+  try {
+    await expect(api.update(row.id, undefined, input, actor)).rejects.toThrow('Profissional não realiza este serviço.');
+  } finally {
+    await db.query('UPDATE "Users" SET "serviceIds" = $1 WHERE id = $2', [[serviceId], userId]);
+  }
+  await api.remove(row.id, undefined, actor);
+  expect((await db.getRepository(Appointment).findOneByOrFail({ id: row.id })).statusName).toBe('Cancelado');
+});
+
 it('cria pendente, reagenda aguardando confirmação e cancela preservando o histórico', async () => {
-  expect(() => api.create({ ...input, statusName: 'Confirmado' }, actor)).toThrow(ForbiddenException);
+  await expect(api.create({ ...input, statusName: 'Confirmado' }, actor)).rejects.toThrow(ForbiddenException);
   const row = await api.create(input, actor);
   expect(row.statusName).toBe('Pendente');
   await db.getRepository(Appointment).update(row.id, { statusName: 'Confirmado' });

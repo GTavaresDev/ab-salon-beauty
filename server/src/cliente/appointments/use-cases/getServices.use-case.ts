@@ -15,14 +15,27 @@ type ServiceRecord = {
   duration: number;
 };
 
-/** Serviços ativos e seguros para seleção no portal do cliente. */
+/** Serviços ativos com ao menos um profissional disponível para seleção no portal do cliente. */
 @Injectable()
 export class getServicesUseCase {
   constructor(private readonly dataSource: DataSource) {}
 
   async execute(): Promise<ClientServiceResponse[]> {
     const services = await this.dataSource.query(
-      'SELECT id, name, description, duration FROM "Services" WHERE status = $1 ORDER BY name ASC',
+      `SELECT s.id, s.name, s.description, s.duration
+       FROM "Services" s
+       WHERE s.status = $1
+         AND EXISTS (
+           SELECT 1 FROM "Users" u
+           WHERE u.status = $1
+             AND s.id = ANY(u."serviceIds")
+             AND NOT EXISTS (
+               SELECT 1 FROM "UserPermissions" up
+               WHERE up."userId" = u.id AND up.enabled = true
+                 AND up.name IN ('Dono', 'Product Manegar', 'Administrador')
+             )
+         )
+       ORDER BY s.name ASC`,
       ['Ativo'],
     ) as ServiceRecord[];
 

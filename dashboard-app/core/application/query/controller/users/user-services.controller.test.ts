@@ -50,6 +50,22 @@ describe("setUserServiceAction", () => {
     expect(queryRaw).toHaveBeenCalledOnce();
   });
 
+  it("allows assigning services to a manager", async () => {
+    findUser.mockResolvedValue({ permissions: [{ name: "Gestor", enabled: true }] });
+    expect(await setUserServiceAction({ userId, serviceId, assigned: true }))
+      .toEqual({ success: true, data: [serviceId] });
+    expect(await replaceUserServicesAction({ userId, serviceIds: [serviceId] }))
+      .toEqual({ success: true, data: [serviceId] });
+  });
+
+  it("does not assign services to an administrator", async () => {
+    findUser.mockResolvedValue({ permissions: [{ name: "Administrador", enabled: true }] });
+    expect(await setUserServiceAction({ userId, serviceId, assigned: true })).toMatchObject({ success: false });
+    expect(await replaceUserServicesAction({ userId, serviceIds: [serviceId] })).toMatchObject({ success: false });
+    expect(queryRaw).not.toHaveBeenCalled();
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
   it("replaces the complete assignment list for an administrator", async () => {
     requireSession.mockResolvedValue({ role: "Administrador" });
     expect(await replaceUserServicesAction({ userId, serviceIds: [serviceId] }))

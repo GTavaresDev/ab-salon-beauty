@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AppointmentsController } from './appointments.controller.js';
-import { Appointment } from './entities/appointment.entity.js';
+import { Appointment, AppointmentReview } from './entities/appointment.entity.js';
 import { getAppointmentsByClientUseCase } from './use-cases/getAppointmentsByClient.use-case.js';
 import { getAppointmentsByIdUseCase } from './use-cases/getAppointmentsById.use-case.js';
 import { deleteAppointmentUseCase } from './use-cases/deleteAppointment.use-case.js';
@@ -32,6 +32,10 @@ describe('AppointmentsController', () => {
           useValue: {
             find: vi.fn(),
           },
+        },
+        {
+          provide: getRepositoryToken(AppointmentReview),
+          useValue: {},
         },
         {
           provide: DataSource,

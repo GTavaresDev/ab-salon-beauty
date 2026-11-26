@@ -5,18 +5,20 @@ export interface StaffServicesEmployee {
   name: string;
   email: string;
   initials: string;
+  role: "Funcionario" | "Gestor";
   serviceIds: string[];
 }
 
 export function listStaffUsers(users: UserProps[]): StaffServicesEmployee[] {
   const byId = new Map<string, StaffServicesEmployee>();
   for (const user of users) {
-    if (user.role !== "Funcionario" || byId.has(user.id)) continue;
+    if ((user.role !== "Funcionario" && user.role !== "Gestor") || byId.has(user.id)) continue;
     byId.set(user.id, {
       id: user.id,
       name: user.name,
       email: user.email,
       initials: user.initials,
+      role: user.role,
       serviceIds: [...new Set(user.serviceIds ?? [])],
     });
   }

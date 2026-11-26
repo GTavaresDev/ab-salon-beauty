@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { UserProps } from "@core/application/query/interface/user.entity";
 import { listStaffUsers } from "./staff-services-users";
 
-function user(id: string, name: string, serviceIds: string[]): UserProps {
-  return { id, name, email: id + "@example.com", phone: "", role: "Funcionario", status: "Ativo", initials: "GT", serviceIds };
+function user(id: string, name: string, serviceIds: string[], role: UserProps["role"] = "Funcionario"): UserProps {
+  return { id, name, email: id + "@example.com", phone: "", role, status: "Ativo", initials: "GT", serviceIds };
 }
 
 describe("listStaffUsers", () => {
@@ -20,5 +20,17 @@ describe("listStaffUsers", () => {
 
   it("deduplicates only repeated rows with the same user id", () => {
     expect(listStaffUsers([user("u1", "Ana", []), user("u1", "Ana", [])])).toHaveLength(1);
+  });
+
+  it("includes managers and employees, but excludes administrators", () => {
+    const result = listStaffUsers([
+      user("manager", "Ana", ["srv-1"], "Gestor"),
+      user("employee", "Bia", [], "Funcionario"),
+      user("admin", "Caio", ["srv-1"], "Administrador"),
+    ]);
+    expect(result.map(({ id, role }) => ({ id, role }))).toEqual([
+      { id: "manager", role: "Gestor" },
+      { id: "employee", role: "Funcionario" },
+    ]);
   });
 });

@@ -35,8 +35,9 @@ export async function setUserServiceAction(input: {
       prisma.user.findUnique({ where: { id: userId }, include: { permissions: { where: { enabled: true } } } }),
       prisma.service.findUnique({ where: { id: serviceId }, select: { id: true } }),
     ]);
-    if (!user || roleFromPermissions(user.permissions) !== "Funcionario") {
-      return { success: false, error: "Funcionário não encontrado." };
+    const targetRole = user ? roleFromPermissions(user.permissions) : null;
+    if (!user || (targetRole !== "Funcionario" && targetRole !== "Gestor")) {
+      return { success: false, error: "Profissional não encontrado." };
     }
     if (!service) return { success: false, error: "Serviço não encontrado." };
 
@@ -86,8 +87,9 @@ export async function replaceUserServicesAction(input: {
       }),
       prisma.service.findMany({ where: { id: { in: serviceIds } }, select: { id: true } }),
     ]);
-    if (!user || roleFromPermissions(user.permissions) !== "Funcionario") {
-      return { success: false, error: "Funcionário não encontrado." };
+    const targetRole = user ? roleFromPermissions(user.permissions) : null;
+    if (!user || (targetRole !== "Funcionario" && targetRole !== "Gestor")) {
+      return { success: false, error: "Profissional não encontrado." };
     }
     if (services.length !== serviceIds.length) {
       return { success: false, error: "Um ou mais serviços não foram encontrados." };

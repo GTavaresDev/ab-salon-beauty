@@ -15,10 +15,14 @@ export class UpdateAppointmentStatus {
     actor: AgendaActor,
     id: string,
     status: "Confirmado" | "Pendente" | "Concluído" | "Cancelado",
+    paymentMethod?: "Pix" | "Dinheiro" | "Crédito" | "Débito" | "Transferência" | "Outro",
   ): Promise<Appointment> {
     const existing = await this.appointmentRepository.findById(id);
     if (!existing || !canManageAppointment(actor, existing)) {
       throw new Error("Agendamento não encontrado.");
+    }
+    if (status === "Concluído" && !paymentMethod && !existing.paymentMethod) {
+      throw new Error("Informe a forma de pagamento para concluir o atendimento.");
     }
 
     if (!["Pendente", "Cancelado", "Concluído", "Confirmado"].includes(status)) throw new Error("Status inválido.");
@@ -39,6 +43,7 @@ export class UpdateAppointmentStatus {
       ...existing.toJSON(),
       status,
       commissionPercent,
+      paymentMethod: status === "Concluído" ? paymentMethod ?? existing.paymentMethod : existing.paymentMethod,
     });
 
     return await this.appointmentRepository.update(updated);

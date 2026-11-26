@@ -15,7 +15,6 @@ export function AgendaPage() {
     appointmentList,
     appointmentsLoading,
     handleAppointmentStatusChange,
-    handleDeleteAppointment,
     userList,
     usersLoading,
     clientsLoading,
@@ -40,7 +39,6 @@ export function AgendaPage() {
       <AgendaView
         appointments={appointmentList}
         onStatusChange={handleAppointmentStatusChange}
-        onDeleteAppointment={handleDeleteAppointment}
         onNew={() => setModal(true)}
         showToast={showToast}
         currentUserRole={currentUser.role}

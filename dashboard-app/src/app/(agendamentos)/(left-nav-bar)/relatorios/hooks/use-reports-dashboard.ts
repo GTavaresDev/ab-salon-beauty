@@ -26,10 +26,15 @@ export function useReportsDashboard() {
 
   useEffect(() => {
     let cancelado = false;
-    if (lerDaMemoria(period)) return;
+    const cached = lerDaMemoria(period);
+    if (cached) {
+      setDbMetrics(cached);
+      setLoading(false);
+    }
 
-    fetchReportMetricsAction(period)
-      .then((data) => {
+    const carregarAtualizado = () => {
+      fetchReportMetricsAction(period)
+        .then((data) => {
         if (cancelado) return;
         if (data) {
           relatorioEmMemoria.set(period, { em: Date.now(), dados: data });
@@ -38,13 +43,24 @@ export function useReportsDashboard() {
       })
       // Sem isto, uma ação que falha (sem permissão, rede fora) deixa o
       // skeleton girando para sempre.
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelado) setLoading(false);
-      });
+        .catch(() => {})
+        .finally(() => {
+          if (!cancelado) setLoading(false);
+        });
+    };
+
+    const atualizarAoVoltar = () => {
+      if (document.visibilityState === "visible") carregarAtualizado();
+    };
+
+    carregarAtualizado();
+    window.addEventListener("focus", carregarAtualizado);
+    document.addEventListener("visibilitychange", atualizarAoVoltar);
 
     return () => {
       cancelado = true;
+      window.removeEventListener("focus", carregarAtualizado);
+      document.removeEventListener("visibilitychange", atualizarAoVoltar);
     };
   }, [period]);
 

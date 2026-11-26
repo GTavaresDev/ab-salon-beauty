@@ -7,11 +7,9 @@ import {
   ChevronDown,
   Clock3,
   MoreVertical,
-  Pencil,
   Plus,
   Power,
   Search,
-  Trash2,
   X,
 } from "lucide-react";
 import { Avatar } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/avatar.component";
@@ -37,7 +35,6 @@ import { PendingAppointmentsModal } from "@/app/(agendamentos)/(left-nav-bar)/da
 export function AgendaView({
   appointments,
   onStatusChange,
-  onDeleteAppointment,
   onNew,
   showToast,
   currentUserRole = "Administrador",
@@ -47,7 +44,6 @@ export function AgendaView({
 }: {
   appointments: AppointmentProps[];
   onStatusChange: (id: string, status: "Confirmado" | "Cancelado" | "Concluído" | "Pendente") => Promise<void>;
-  onDeleteAppointment: (id: string) => Promise<void>;
   onNew: () => void;
   showToast: (message: string) => void;
   currentUserRole?: "Dono" | "Administrador" | "Gestor" | "Funcionario";
@@ -84,7 +80,7 @@ export function AgendaView({
     filteredAppointments,
     pagedAppointments,
     channelMap,
-  } = useAgendaView({ appointments, onStatusChange, onDeleteAppointment, onNew, showToast, currentUserRole, currentUserName, currentUserId, userList });
+  } = useAgendaView({ appointments, onStatusChange, onNew, showToast, currentUserRole, currentUserName, currentUserId, userList });
 
   return (
     <div className="mx-auto max-w-375 p-3 sm:p-5 lg:p-6">
@@ -216,7 +212,7 @@ export function AgendaView({
           </div>
 
           <div className="max-h-105 overflow-y-auto divide-y divide-zinc-100 min-h-65">
-            {pagedAppointments.map((item) => {
+            {pagedAppointments.map((item, itemIndex) => {
               const attendantLabel = appointmentAttendantLabel(item);
               const channelLabel = channelMap.get(item.channelId) || "Sistema";
               const serviceColor = resolveServiceColor(serviceList, item);
@@ -247,7 +243,7 @@ export function AgendaView({
                     <MoreVertical className="size-4" />
                   </button>
                   {openMenuId === item.id && (
-                    <div className="absolute right-0 top-8 z-50 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl">
+                    <div className={cn("absolute right-0 z-50 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl", itemIndex >= pagedAppointments.length - 2 ? "bottom-8" : "top-8")}>
                       {isPending ? (
                         <>
                           <button
@@ -276,14 +272,13 @@ export function AgendaView({
                           <button
                             type="button"
                             onClick={async () => {
-                              const nextStatus = item.status === "Confirmado" ? "Concluído" : "Confirmado";
-                              await onStatusChange(item.id, nextStatus);
+                              await onStatusChange(item.id, "Concluído");
                               setOpenMenuId(null);
                             }}
                             className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors"
                           >
                             <Power className="size-4 shrink-0 text-zinc-500" />{" "}
-                            {item.status === "Confirmado" ? "Marcar como Concluído" : "Marcar como Confirmado"}
+                            Concluído
                           </button>
                           <button
                             type="button"
@@ -293,36 +288,11 @@ export function AgendaView({
                             }}
                             className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors"
                           >
-                            <X className="size-4 shrink-0 text-zinc-500" /> Cancelar agendamento
+                            <X className="size-4 shrink-0 text-zinc-500" /> Cancelar
                           </button>
                         </>
                       )}
 
-                      <div className="my-1 h-px bg-zinc-100" />
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          showToast(`Edição do agendamento de ${item.name}`);
-                          setOpenMenuId(null);
-                        }}
-                        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors"
-                      >
-                        <Pencil className="size-4 shrink-0 text-zinc-500" /> Editar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          await onDeleteAppointment(item.id);
-                          showToast(
-                            `Agendamento de ${item.name} excluído do banco`,
-                          );
-                          setOpenMenuId(null);
-                        }}
-                        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        <Trash2 className="size-4 shrink-0 text-red-500" /> Excluir
-                      </button>
                     </div>
                   )}
                 </>

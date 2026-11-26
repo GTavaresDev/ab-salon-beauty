@@ -11,6 +11,7 @@ export interface AppointmentProps {
   servicePrice?: number | null;
   serviceColor?: string | null;
   commissionPercent?: number | null;
+  paymentMethod?: "Pix" | "Dinheiro" | "Crédito" | "Débito" | "Transferência" | "Outro" | null;
   duration: string;
   status: "Confirmado" | "Pendente" | "Concluído" | "Cancelado";
   statusId?: string | null;
@@ -69,6 +70,9 @@ export class Appointment {
   }
   get commissionPercent(): number | null | undefined {
     return this.props.commissionPercent;
+  }
+  get paymentMethod(): AppointmentProps["paymentMethod"] {
+    return this.props.paymentMethod;
   }
   get duration(): string {
     return this.props.duration;

@@ -22,7 +22,6 @@ const fullDateFormatter = new Intl.DateTimeFormat("pt-BR", {
 export function useAgendaView({
   appointments,
   onStatusChange,
-  onDeleteAppointment,
   onNew,
   showToast,
   currentUserRole = "Administrador",
@@ -32,7 +31,6 @@ export function useAgendaView({
 }: {
   appointments: AppointmentProps[];
   onStatusChange: (id: string, status: "Confirmado" | "Cancelado" | "Concluído" | "Pendente") => Promise<void>;
-  onDeleteAppointment: (id: string) => Promise<void>;
   onNew: () => void;
   showToast: (message: string) => void;
   currentUserRole?: "Dono" | "Administrador" | "Gestor" | "Funcionario";

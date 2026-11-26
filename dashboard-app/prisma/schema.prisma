@@ -24,6 +24,7 @@ model User {
   appointments         Appointment[]
   permissions          UserPermission[]
   sales                Sale[]
+  appointmentReviews   AppointmentReview[]
 
   @@map("Users")
 }
@@ -80,6 +81,7 @@ model Client {
   appointments Appointment[]
   oauthAccounts ClientOAuthAccount[]
   passwordResetTokens ClientPasswordResetToken[]
+  appointmentReviews AppointmentReview[]
 
   @@map("Clients")
 }
@@ -163,9 +165,11 @@ model Appointment {
   client       Client?            @relation(fields: [clientId], references: [id], onDelete: SetNull)
   serviceId    String?
   commissionPercent Float?
+  paymentMethod String?
   serviceRecord Service?          @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
+  review       AppointmentReview?
 
   @@index([date])
   @@index([status])
@@ -174,6 +178,24 @@ model Appointment {
   @@index([clientId])
   @@index([serviceId])
   @@map("Appointments")
+}
+
+model AppointmentReview {
+  id            String      @id @default(uuid())
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  clientId      String
+  client        Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  attendantId   String
+  attendant     User        @relation(fields: [attendantId], references: [id], onDelete: Restrict)
+  rating        Int?
+  reviewedAt    DateTime?
+  dismissedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([clientId, reviewedAt, dismissedAt])
+  @@map("AppointmentReviews")
 }
 
 model AppointmentChannel {

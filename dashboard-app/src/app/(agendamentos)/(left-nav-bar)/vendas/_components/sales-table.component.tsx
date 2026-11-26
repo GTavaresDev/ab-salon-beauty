@@ -118,7 +118,7 @@ export function SalesTable({
           <span />
         </div>
         <div className={cn("divide-y divide-zinc-100", TABLE_BODY_MIN_HEIGHT_CLASS)}>
-          {pagedSales.map((sale) => {
+          {pagedSales.map((sale, itemIndex) => {
             const actionMenuNode = (
               <div className="relative">
                 <button
@@ -131,7 +131,7 @@ export function SalesTable({
                   <MoreVertical className="size-4" />
                 </button>
                 {openMenuId === sale.id && (
-                  <div className="absolute right-0 top-8 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl">
+                  <div className={`absolute right-0 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl ${itemIndex >= pagedSales.length - 2 ? "bottom-8" : "top-8"}`}>
                     <button
                       type="button"
                       onClick={() => {

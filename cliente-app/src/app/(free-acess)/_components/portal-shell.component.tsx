@@ -9,6 +9,8 @@ import { LogoutButton } from "./logout-button.component";
 import { PortalNav } from "./portal-nav.component";
 import { firstName } from "./portal-format/portal-format";
 import { ForcedSessionLogout } from "./forced-session-logout.component";
+import { AppointmentReviewModal } from "./appointment-review-modal.component";
+import { getPendingReviewsAction } from "@core/application/query/controller/read-appointment.controller";
 
 /**
  * Guarda das páginas do portal. O middleware já redireciona, mas cada página
@@ -43,7 +45,7 @@ export async function requireCompletePortalSession(): Promise<ClientSession> {
  * Casca do portal do cliente: cabeçalho próprio, sem a sidebar do sistema
  * interno. Mobile-first — a navegação vira barra inferior no celular.
  */
-export function PortalShell({
+export async function PortalShell({
   session,
   title,
   subtitle,
@@ -57,12 +59,14 @@ export function PortalShell({
   locked?: boolean;
   children: ReactNode;
 }) {
+  const pendingReviews = locked ? [] : await getPendingReviewsAction();
   const headerTitle = title ?? `Olá, ${firstName(session.name)}!`;
   const headerSubtitle =
     subtitle ?? "Gerencie seus agendamentos e acompanhe seus próximos horários.";
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-950">
+      {!locked ? <AppointmentReviewModal reviews={pendingReviews} clientName={session.name} /> : null}
       <ForcedSessionLogout expiresAt={session.expiresAt} />
       {/* Sidebar Persistente no Desktop */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-zinc-200 bg-white p-4 lg:flex">

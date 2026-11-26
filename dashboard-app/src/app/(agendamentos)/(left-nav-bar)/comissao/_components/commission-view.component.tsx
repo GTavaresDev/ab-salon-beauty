@@ -28,11 +28,12 @@ export function CommissionView() {
     const percent = a.commissionPercent ?? 0;
     const amount = Number(a.servicePrice) || 0;
     return { ...a, percent, amount, commission: amount * percent / 100, professional: user?.name || a.userName || "Não informado" };
-  }).filter(a => (!professional || a.userId === professional) && (!from || a.date >= from) && (!to || a.date <= to)), [appointmentList, users, professional, from, to]);
+  }).filter(a => (!professional || a.userId === professional) && (!from || a.date >= from) && (!to || a.date <= to))
+    .sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time)), [appointmentList, users, professional, from, to]);
   const visible = rows.slice((page - 1) * 10, page * 10);
   function exportCsv() {
     const header = ["Data","Horário","Procedimento","Cliente","Profissional","Valor","Pagamento","Percentual","Comissão"];
-    const body = rows.map(r => [dateBR(r.date), r.time, r.service || "Não informado", r.name, r.professional, r.amount.toFixed(2).replace(".", ","), "Não informado", `${r.percent}%`, r.commission.toFixed(2).replace(".", ",")]);
+    const body = rows.map(r => [dateBR(r.date), r.time, r.service || "Não informado", r.name, r.professional, r.amount.toFixed(2).replace(".", ","), r.paymentMethod || "Não informado", `${r.percent}%`, r.commission.toFixed(2).replace(".", ",")]);
     const csv = "\uFEFF" + [header, ...body].map(line => line.map(v => `"${String(v).replaceAll('"', '""')}"`).join(";")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); const a = document.createElement("a"); a.href = url; a.download = `comissoes-${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
   }
@@ -70,7 +71,7 @@ export function CommissionView() {
               <span className="text-zinc-700">{row.name}</span>
               <span className="text-zinc-700">{row.professional}</span>
               <span className="text-zinc-700">{money(row.amount)}</span>
-              <span className="text-zinc-500">Não informado</span>
+              <span className="text-zinc-500">{row.paymentMethod || "Não informado"}</span>
               <span className="font-medium text-zinc-700">{row.percent}%</span>
               <span className="font-semibold text-emerald-600">{money(row.commission)}</span>
             </div>

@@ -36,6 +36,7 @@ export class AppointmentMapper {
       servicePrice: raw.serviceRecord?.price || null,
       serviceColor: raw.serviceRecord?.color || null,
       commissionPercent: raw.commissionPercent,
+      paymentMethod: raw.paymentMethod as Appointment["paymentMethod"],
       userName: raw.user?.name || null,
       userRole: raw.user ? roleFromPermissions(raw.user.permissions) : null,
       clientPhone: raw.client?.phone || null,
@@ -60,6 +61,7 @@ export class AppointmentMapper {
     clientId: string | null;
     serviceId?: string | null;
     commissionPercent: number | null;
+    paymentMethod: string | null;
   } {
     return {
       id: appointment.id,
@@ -77,6 +79,7 @@ export class AppointmentMapper {
       clientId: appointment.clientId || null,
       serviceId: appointment.serviceId || null,
       commissionPercent: appointment.commissionPercent ?? null,
+      paymentMethod: appointment.paymentMethod ?? null,
     };
   }
 }

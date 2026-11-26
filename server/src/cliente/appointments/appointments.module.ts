@@ -5,6 +5,7 @@ import {
   Appointment,
   AppointmentStatus,
   AppointmentChannel,
+  AppointmentReview,
 } from './entities/appointment.entity.js';
 import { getAppointmentsByClientUseCase } from './use-cases/getAppointmentsByClient.use-case.js';
 import { getAppointmentsByIdUseCase } from './use-cases/getAppointmentsById.use-case.js';
@@ -22,6 +23,7 @@ import { AppointmentOwnershipUseCase } from '../../security/client/appointment-o
       Appointment,
       AppointmentStatus,
       AppointmentChannel,
+      AppointmentReview,
     ]),
   ],
   controllers: [AppointmentsController],

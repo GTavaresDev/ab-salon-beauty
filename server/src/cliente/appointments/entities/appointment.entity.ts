@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  OneToOne,
   ManyToOne,
   JoinColumn,
   Index,
@@ -104,6 +105,44 @@ export class Appointment {
   })
   @JoinColumn({ name: 'statusId' })
   status?: AppointmentStatus | null;
+
+  @CreateDateColumn({ type: 'timestamp without time zone' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp without time zone' })
+  updatedAt: Date;
+
+  @OneToOne(() => AppointmentReview, (review) => review.appointment)
+  review?: AppointmentReview | null;
+}
+
+@Entity('AppointmentReviews')
+@Index(['appointmentId'], { unique: true })
+export class AppointmentReview {
+  @PrimaryColumn({ type: 'text' })
+  id: string;
+
+  @Column({ type: 'text' })
+  appointmentId: string;
+
+  @Column({ type: 'text' })
+  clientId: string;
+
+  @Column({ type: 'text' })
+  attendantId: string;
+
+  @Column({ type: 'int', nullable: true })
+  rating?: number | null;
+
+  @Column({ type: 'timestamp without time zone', nullable: true })
+  reviewedAt?: Date | null;
+
+  @Column({ type: 'timestamp without time zone', nullable: true })
+  dismissedAt?: Date | null;
+
+  @OneToOne(() => Appointment, (appointment) => appointment.review, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'appointmentId' })
+  appointment: Appointment;
 
   @CreateDateColumn({ type: 'timestamp without time zone' })
   createdAt: Date;

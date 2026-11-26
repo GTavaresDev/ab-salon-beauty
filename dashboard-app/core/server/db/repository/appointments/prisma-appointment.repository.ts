@@ -116,6 +116,7 @@ export class PrismaAppointmentRepository implements AppointmentRepository {
         clientId: raw.clientId,
         serviceId: raw.serviceId,
         commissionPercent: raw.commissionPercent,
+        paymentMethod: raw.paymentMethod,
       },
       include: withRelations,
     });
@@ -136,21 +137,18 @@ export class PrismaAppointmentRepository implements AppointmentRepository {
         initials: raw.initials,
         channelId: raw.channelId,
         notes: raw.notes,
-        userId: raw.userId,
-        clientId: raw.clientId,
-        serviceId: raw.serviceId,
+        user: raw.userId ? { connect: { id: raw.userId } } : { disconnect: true },
+        client: raw.clientId ? { connect: { id: raw.clientId } } : { disconnect: true },
+        serviceRecord: raw.serviceId ? { connect: { id: raw.serviceId } } : { disconnect: true },
+        statusRecord: raw.statusId
+          ? { connect: { id: raw.statusId } }
+          : { disconnect: true },
         commissionPercent: raw.commissionPercent,
+        paymentMethod: raw.paymentMethod,
       },
       include: withRelations,
     });
-    const withStatus = await this.db.appointment.update({
-      where: { id: raw.id },
-      data: raw.statusId
-        ? { statusRecord: { connect: { id: raw.statusId } } }
-        : { statusRecord: { disconnect: true } },
-      include: withRelations,
-    });
-    return AppointmentMapper.toDomain(withStatus);
+    return AppointmentMapper.toDomain(updated);
   }
 
   async delete(id: string): Promise<void> {

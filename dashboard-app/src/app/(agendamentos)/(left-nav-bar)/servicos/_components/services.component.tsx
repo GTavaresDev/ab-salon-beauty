@@ -153,7 +153,7 @@ export function Services({
               <span />
             </div>
             <div className={cn("divide-y divide-zinc-100", TABLE_BODY_MIN_HEIGHT_CLASS)}>
-              {paginatedItems.filter(s => !!s.id).map((service) => {
+              {paginatedItems.filter(s => !!s.id).map((service, itemIndex, items) => {
                 const actionMenuNode = (
                   <div className="relative">
                     <button
@@ -167,7 +167,7 @@ export function Services({
                       <MoreVertical className="size-4" />
                     </button>
                     {openMenuId === service.id && (
-                      <div className="absolute right-0 top-8 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl">
+                      <div className={cn("absolute right-0 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl", itemIndex >= items.length - 2 ? "bottom-8" : "top-8")}>
                         <button
                           type="button"
                           onClick={() => {

@@ -20,7 +20,6 @@ export function useDashboardView() {
     appointmentList,
     isLoading: appointmentsLoading,
     handleAppointmentStatusChange,
-    handleDeleteAppointment,
   } = useAppointments();
   const { clientList, isLoading: clientsLoading } = useClients();
   const { serviceList } = useServices();
@@ -34,7 +33,6 @@ export function useDashboardView() {
   const appointments = appointmentList;
   const clientsCount = clientList.length;
   const onStatusChange = handleAppointmentStatusChange;
-  const onDeleteAppointment = handleDeleteAppointment;
 
   // Calculate weekly movement from database
   const bars = useMemo(() => {
@@ -122,7 +120,6 @@ export function useDashboardView() {
     appointments,
     clientsCount,
     onStatusChange,
-    onDeleteAppointment,
     bars,
     todayIso,
     pendingAppointments,

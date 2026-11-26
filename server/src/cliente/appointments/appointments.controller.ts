@@ -1,7 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Optional } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Optional, BadRequestException, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { randomUUID } from 'node:crypto';
 import { CurrentClientAgendaActor, clientAgendaScope } from '../../security/client/client-agenda.guard.js';
 import type { ClientAgendaActor } from '../../security/client/client-agenda.guard.js';
 import { CreateAppointmentDto } from './dto/create-appointment.dto.js';
+import { Appointment, AppointmentReview } from './entities/appointment.entity.js';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto.js';
 import { getAppointmentsByClientUseCase } from './use-cases/getAppointmentsByClient.use-case.js';
 import { getAppointmentsByIdUseCase } from './use-cases/getAppointmentsById.use-case.js';
@@ -27,6 +31,8 @@ export class AppointmentsController {
     private readonly getProfessionals: getProfessionalsUseCase,
     @Optional() private readonly getDates: getDateUseCase,
     private readonly appointmentOwnership: AppointmentOwnershipUseCase,
+    @InjectRepository(Appointment) private readonly appointmentRecords: Repository<Appointment>,
+    @InjectRepository(AppointmentReview) private readonly reviews: Repository<AppointmentReview>,
   ) {}
 
   @Post()
@@ -41,6 +47,33 @@ export class AppointmentsController {
   @Get('client/:clientId')
   findByClient(@Param('clientId') clientId: string, @CurrentClientAgendaActor() actor: ClientAgendaActor) {
     return this.appointmentsByClientUseCase.findByClient(clientId, clientAgendaScope(actor));
+  }
+
+  @Get('reviews/pending')
+  async pendingReviews(@CurrentClientAgendaActor() actor: ClientAgendaActor) {
+    if (actor.issuer !== 'client') throw new ForbiddenException('Acesso não permitido.');
+    return this.appointmentRecords.query(
+      'SELECT a."id" AS "appointmentId", a."date", a."time", u."name" AS "professionalName" FROM "Appointments" a LEFT JOIN "AppointmentReviews" r ON r."appointmentId" = a."id" LEFT JOIN "Users" u ON u."id" = a."userId" WHERE a."clientId" = $1 AND a."status" = $2 AND r."id" IS NULL ORDER BY a."date" DESC, a."time" DESC',
+      [actor.sub, 'Concluído'],
+    );
+  }
+
+  @Post('reviews/:appointmentId')
+  async submitReview(@Param('appointmentId') appointmentId: string, @Body() body: { rating?: unknown }, @CurrentClientAgendaActor() actor: ClientAgendaActor) {
+    if (actor.issuer !== 'client') throw new ForbiddenException('Acesso não permitido.');
+    const rating = Number(body?.rating);
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) throw new BadRequestException('A nota deve ser de 1 a 5.');
+    const appointment = await this.appointmentRecords.findOne({ where: { id: appointmentId, clientId: actor.sub } });
+    if (!appointment) throw new NotFoundException('Atendimento não encontrado.');
+    if (appointment.statusName !== 'Concluído' || !appointment.userId) throw new BadRequestException('Este atendimento não pode receber avaliação.');
+    try {
+      const review = this.reviews.create({ id: randomUUID(), appointmentId, clientId: actor.sub, attendantId: appointment.userId, rating, reviewedAt: new Date() });
+      await this.reviews.save(review);
+      return { success: true };
+    } catch (error) {
+      if ((error as { code?: string })?.code === '23505') throw new ConflictException('Este atendimento já foi avaliado.');
+      throw error;
+    }
   }
 
   @Get('services')

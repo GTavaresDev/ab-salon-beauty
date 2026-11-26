@@ -4,6 +4,20 @@ import { toClientAppointmentDTO, type ClientAppointmentDTO, type ClientAppointme
 
 export const apiBaseUrl = () => process.env.CLIENT_AGENDA_API_URL ?? "https://agendamentos-codebase-server.vercel.app";
 
+export type PendingAppointmentReview = { appointmentId: string; date: string; time: string; professionalName: string | null };
+
+export async function getPendingReviewsGateway(clientId: string): Promise<Either<RequestError, PendingAppointmentReview[]>> {
+  const token = await getApiToken(clientId);
+  if (token.tag === "left") return token;
+  return clientHttp<PendingAppointmentReview[]>({ url: `${apiBaseUrl()}/appointments/reviews/pending`, headers: { authorization: `Bearer ${token.value}` } });
+}
+
+export async function submitReviewGateway(clientId: string, appointmentId: string, rating: number): Promise<Either<RequestError, { success: true }>> {
+  const token = await getApiToken(clientId);
+  if (token.tag === "left") return token;
+  return clientHttp<{ success: true }>({ url: `${apiBaseUrl()}/appointments/reviews/${encodeURIComponent(appointmentId)}`, method: "POST", headers: { authorization: `Bearer ${token.value}` }, body: { rating } });
+}
+
 export async function clientHttp<T>(request: HttpRequest, timeoutMs = 10_000): Promise<Either<RequestError, T>> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);

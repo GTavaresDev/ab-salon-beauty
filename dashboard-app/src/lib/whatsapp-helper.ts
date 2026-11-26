@@ -62,6 +62,32 @@ export function buildAppointmentConfirmationMessage(params: AppointmentWhatsAppP
   return lines.join("\n");
 }
 
+export function buildAppointmentCancellationMessage(params: AppointmentWhatsAppParams): string {
+  const greeting = params.clientName?.trim()
+    ? `Olá, ${params.clientName.trim()}! Informamos que seu horário de ${formatWhatsAppDate(params.date)} às ${params.time} foi cancelado.`
+    : `Olá! Informamos que seu horário de ${formatWhatsAppDate(params.date)} às ${params.time} foi cancelado.`;
+  const lines = [
+    greeting,
+    "",
+    `Serviço: ${params.serviceName?.trim() || "Não informado"}`,
+    `Profissional: ${params.professionalName?.trim() || "Equipe da clínica"}`,
+  ];
+  return lines.join("\n");
+}
+
+export function buildAppointmentCancellationWhatsAppUrl(params: AppointmentWhatsAppParams): string {
+  const phoneDigits = formatWhatsAppPhone(params.phone);
+  const encodedText = encodeURIComponent(buildAppointmentCancellationMessage(params));
+  return phoneDigits
+    ? `https://wa.me/${phoneDigits}?text=${encodedText}`
+    : `https://wa.me/?text=${encodedText}`;
+}
+
+export function openWhatsAppCancellation(params: AppointmentWhatsAppParams): void {
+  if (typeof window === "undefined") return;
+  window.open(buildAppointmentCancellationWhatsAppUrl(params), "_blank", "noopener,noreferrer");
+}
+
 /**
  * Gera a URL do WhatsApp com o link wa.me e a mensagem codificada.
  */

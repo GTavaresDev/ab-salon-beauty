@@ -6,11 +6,9 @@ import {
   CalendarDays,
   Check,
   MoreVertical,
-  Pencil,
   Plus,
   Power,
   TrendingUp,
-  Trash2,
   UserCheck,
   Clock3,
   ShoppingCart,
@@ -57,7 +55,6 @@ export function DashboardView() {
     appointments,
     clientsCount,
     onStatusChange,
-    onDeleteAppointment,
     bars,
     todayIso,
     pendingAppointments,
@@ -280,7 +277,7 @@ export function DashboardView() {
           </CardHeader>
           <CardContent className="px-0 pb-2">
             <div className="min-h-85 max-h-85 overflow-y-auto divide-y divide-zinc-100">
-              {displayedAppointments.map((item) => {
+              {displayedAppointments.map((item, itemIndex) => {
                 const attendantLabel = appointmentAttendantLabel(item);
                 const serviceColor = resolveServiceColor(serviceList, item);
                 const isPending = item.status === "Pendente";
@@ -340,7 +337,7 @@ export function DashboardView() {
                         <MoreVertical className="size-4" />
                       </button>
                       {openMenuId === item.id && (
-                        <div className="absolute right-0 top-10 z-50 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl">
+                        <div className={cn("absolute right-0 z-50 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl", itemIndex >= displayedAppointments.length - 2 ? "bottom-10" : "top-10")}>
                           {isPending ? (
                             <>
                               <button
@@ -369,14 +366,13 @@ export function DashboardView() {
                               <button
                                 type="button"
                                 onClick={async () => {
-                                  const nextStatus = item.status === "Confirmado" ? "Concluído" : "Confirmado";
-                                  await onStatusChange(item.id, nextStatus);
+                                  await onStatusChange(item.id, "Concluído");
                                   setOpenMenuId(null);
                                 }}
                                 className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
                               >
                                 <Power className="size-4 shrink-0 text-zinc-500" />{" "}
-                                {item.status === "Confirmado" ? "Marcar como Concluído" : "Marcar como Confirmado"}
+                                Concluído
                               </button>
                               <button
                                 type="button"
@@ -386,36 +382,11 @@ export function DashboardView() {
                                 }}
                                 className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
                               >
-                                <X className="size-4 shrink-0 text-zinc-500" /> Cancelar agendamento
+                                <X className="size-4 shrink-0 text-zinc-500" /> Cancelar
                               </button>
                             </>
                           )}
 
-                          <div className="my-1 h-px bg-zinc-100" />
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              showToast(`Editar agendamento de ${item.name}`);
-                              setOpenMenuId(null);
-                            }}
-                            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
-                          >
-                            <Pencil className="size-4 shrink-0 text-zinc-500" /> Editar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              await onDeleteAppointment(item.id);
-                              showToast(
-                                `Agendamento de ${item.name} excluído`,
-                              );
-                              setOpenMenuId(null);
-                            }}
-                            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
-                          >
-                            <Trash2 className="size-4 shrink-0 text-red-500" /> Excluir
-                          </button>
                         </div>
                       )}
                     </div>

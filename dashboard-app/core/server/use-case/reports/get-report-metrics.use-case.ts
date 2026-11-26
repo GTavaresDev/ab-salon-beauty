@@ -42,6 +42,7 @@ export interface ReportMetrics {
     status: string;
   }>;
   professionals: Array<{
+    id: string;
     name: string;
     initials: string;
     appointments: number;
@@ -392,6 +393,7 @@ export class GetReportMetrics {
       }
 
       return {
+        id: u.id,
         name: u.name,
         initials: u.initials || "US",
         appointments: apptCount,

@@ -57,13 +57,14 @@ export async function createAppointmentAction(input: {
 export async function updateAppointmentStatusAction(
   id: string,
   status: "Confirmado" | "Pendente" | "Concluído" | "Cancelado",
+  paymentMethod?: "Pix" | "Dinheiro" | "Crédito" | "Débito" | "Transferência" | "Outro",
 ): Promise<ActionResult<AppointmentProps>> {
   try {
     const actor = await requireSessionAction();
     const target = await appointmentRepository.findById(id);
     if (!target) throw new Error("Agendamento não encontrado.");
     const updated = await withDayLock(target.date, (appointments) =>
-      updateStatus(appointments).execute(actor, id, status));
+      updateStatus(appointments).execute(actor, id, status, paymentMethod));
     return { success: true, data: updated.toJSON() };
   } catch (error: unknown) {
     return { success: false, error: formatActionError(error, "Erro ao atualizar agendamento.") };

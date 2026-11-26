@@ -54,9 +54,7 @@ export class ClientAgendaGuard implements CanActivate {
       const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString());
       if (!['client', 'staff'].includes(payload.iss) || header.alg !== 'RS256') throw new Error();
 
-      const keys = JSON.parse(
-        process.env[`CLIENT_AGENDA_${payload.iss.toUpperCase()}_PUBLIC_KEYS`] ?? '{}',
-      );
+      const keys = JSON.parse(process.env[`CLIENT_AGENDA_${payload.iss.toUpperCase()}_PUBLIC_KEYS`] ?? '{}');
       if (!keys[header.kid]) throw new Error();
 
       const valid = verify(
@@ -76,7 +74,7 @@ export class ClientAgendaGuard implements CanActivate {
       if (payload.iss === 'client' && !await hasPortalAccess(this.db, payload.sub)) throw new Error();
       request.clientAgendaActor = {
         sub: payload.sub,
-        issuer: payload.iss,
+        issuer: payload.iss === 'client' ? 'client' : 'staff',
         role: payload.iss === 'staff' ? payload.role : undefined,
       } satisfies ClientAgendaActor;
       return true;

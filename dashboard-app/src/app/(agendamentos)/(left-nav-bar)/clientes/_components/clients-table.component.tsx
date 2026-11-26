@@ -78,7 +78,7 @@ export function ClientsTable({
         <span>Último agendamento</span>
         <span />
       </div>
-      <div className="max-h-85 overflow-y-auto divide-y divide-zinc-100 min-h-65">        {clients.map((client) => {
+      <div className="max-h-85 overflow-y-auto divide-y divide-zinc-100 min-h-65">        {clients.map((client, itemIndex) => {
           const lastAppointment = getLastAppointmentForClient(
             appointmentList,
             client,
@@ -101,7 +101,7 @@ export function ClientsTable({
                 <MoreVertical className="size-4" />
               </button>
               {openMenuId === client.id && (
-                <div className="absolute right-0 top-8 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl">
+                <div className={`absolute right-0 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl ${itemIndex >= clients.length - 2 ? "bottom-8" : "top-8"}`}>
                   <button
                     type="button"
                     onClick={() => {

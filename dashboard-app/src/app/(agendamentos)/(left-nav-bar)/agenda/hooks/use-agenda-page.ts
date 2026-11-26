@@ -15,7 +15,6 @@ export function useAgendaPage() {
     appointmentList,
     isLoading: appointmentsLoading,
     handleAppointmentStatusChange,
-    handleDeleteAppointment,
   } = useAppointments();
   const { userList, isLoading: usersLoading } = useUsers();
   const { isLoading: clientsLoading } = useClients();
@@ -31,7 +30,6 @@ export function useAgendaPage() {
     appointmentList,
     appointmentsLoading,
     handleAppointmentStatusChange,
-    handleDeleteAppointment,
     userList,
     usersLoading,
     clientsLoading,

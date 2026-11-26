@@ -30,7 +30,12 @@ export class getProfessionalsUseCase {
     if (!services.length) throw new NotFoundException('Serviço indisponível.');
 
     const professionals = await this.dataSource.query(
-      'SELECT id, name, initials FROM "Users" WHERE status = $1 ORDER BY name ASC',
+      `SELECT u.id, u.name, u.initials
+       FROM "Users" u
+       LEFT JOIN "UserPermissions" up ON up."userId" = u.id AND up.enabled = true
+       WHERE u.status = $1
+         AND (up.name IS NULL OR up.name NOT IN ('Dono', 'Product Manegar', 'Administrador'))
+       ORDER BY u.name ASC`,
       ['Ativo'],
     ) as ProfessionalRecord[];
 

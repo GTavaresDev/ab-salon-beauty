@@ -13,7 +13,6 @@ export default async function proxy(request: NextRequest, _event: NextFetchEvent
   const session = value ? await decodeClientSessionToken(value) : null;
   const protectedRoute = isUnder(pathname, HOME);
 
-  if (session && !protectedRoute) return NextResponse.redirect(new URL(HOME, request.url));
   if (!session && protectedRoute) return NextResponse.redirect(new URL(AUTH_ROOT, request.url));
   return NextResponse.next();
 }

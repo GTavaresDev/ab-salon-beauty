@@ -3,6 +3,13 @@ import type { RequestError } from "@core/application/query/contract/appointment.
 import type { BookableProfessionalDTO } from "@core/application/query/contract/professional.contract";
 import { apiBaseUrl, clientHttp, getApiToken } from "./appointment.gateway";
 
+export function isPublicBookableProfessional(professional: BookableProfessionalDTO): boolean {
+  if (professional.role === "Administrador" || professional.role === "Dono") return false;
+  const normalizedName = professional.name.trim().toLowerCase();
+  if (normalizedName === "product manegar" || normalizedName === "administrador") return false;
+  return true;
+}
+
 export async function getBookableProfessionalsGateway(
   clientId: string,
   serviceId: string,
@@ -14,5 +21,5 @@ export async function getBookableProfessionalsGateway(
     headers: { authorization: `Bearer ${token.value}` },
   });
   if (result.tag === "left") return result;
-  return success(result.value.filter((professional) => professional.role !== "Administrador"));
+  return success(result.value.filter(isPublicBookableProfessional));
 }

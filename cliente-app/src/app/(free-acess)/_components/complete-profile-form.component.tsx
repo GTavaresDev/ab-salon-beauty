@@ -19,6 +19,8 @@ import { formatPhoneBR } from "@/lib/input-masks";
 export function CompleteProfileForm({ profile }: { profile: ClientProfileStatusDTO }) {
   const {
     form,
+    acceptedTerms,
+    setAcceptedTerms,
     error,
     loading,
     update,
@@ -95,7 +97,21 @@ export function CompleteProfileForm({ profile }: { profile: ClientProfileStatusD
             </p>
           ) : null}
 
-          <Button className="w-full" size="lg" type="submit" disabled={loading}>
+          <label className="flex items-start gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              className="mt-1 size-4 shrink-0 accent-zinc-900"
+            />
+            <span className="text-xs leading-relaxed text-zinc-500">
+              Ao continuar, aceito que meus dados pessoais (nome, e-mail,
+              telefone e data de nascimento) sejam armazenados e utilizados
+              pela clínica para oferecer um atendimento personalizado.
+            </span>
+          </label>
+
+          <Button className="w-full" size="lg" type="submit" disabled={loading || !acceptedTerms}>
             {loading ? "Salvando..." : "Salvar e continuar"}
             {!loading && <ArrowRight />}
           </Button>

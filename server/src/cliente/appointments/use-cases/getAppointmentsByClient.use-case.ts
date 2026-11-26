@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { FindOptionsWhere } from 'typeorm';
@@ -32,8 +32,11 @@ export class getAppointmentsByClientUseCase {
     clientId: string,
     scope: FindOptionsWhere<Appointment>,
   ): Promise<ClientAppointmentResponse[]> {
+    if (scope.clientId !== undefined && scope.clientId !== clientId) {
+      throw new ForbiddenException('Acesso à agenda não permitido.');
+    }
     const appointments = await this.appointmentsRepository.find({
-      where: { ...scope, clientId },
+      where: { clientId, ...scope },
       relations: {
         status: true,
       },

@@ -1,6 +1,13 @@
+export interface ResetTokenIssue {
+  clientId: string;
+  tokenHash: string;
+  expiresAt: Date;
+  issuedEmail: string;
+  originHash: string;
+}
+
 export interface ClientPasswordResetTokenRepository {
-  create(input: { clientId: string; tokenHash: string; expiresAt: Date }): Promise<void>;
+  issue(input: ResetTokenIssue): Promise<boolean>;
   findValidByTokenHash(tokenHash: string): Promise<{ clientId: string } | null>;
-  markUsed(tokenHash: string): Promise<void>;
-  invalidateAllForClient(clientId: string): Promise<void>;
+  consume(clientId: string, tokenHash: string, passwordHash: string): Promise<boolean>;
 }

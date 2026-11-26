@@ -29,3 +29,7 @@ export function canAccessUsers(user?: UserWithPermissions | null): boolean {
   if (user.permissionLevel === 0 || user.permissionLevel === 1 || user.permissionLevel === 2 || user.role === "Dono" || user.role === "Gestor") return true;
   return false;
 }
+
+export function canApprovePortalAccess(user: UserWithPermissions): boolean {
+  return user.role === "Gestor" || user.role === "Administrador";
+}

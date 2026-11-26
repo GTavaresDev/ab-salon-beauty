@@ -7,7 +7,8 @@ import {
 } from "@core/application/use-cases/login/google-account-link.usecase";
 import { PrismaClientOAuthAccountRepository } from "@core/domain/auth/infrastructure/persistence/prisma/login/prisma-client-oauth-account.repository";
 import { PrismaClientRepository } from "@core/domain/auth/infrastructure/persistence/prisma/login/prisma-client.repository";
-import { PrismaUserRepository } from "@core/domain/auth/infrastructure/persistence/prisma/users/prisma-user.repository";
+import { prisma } from "@core/infrastructure/shared/client";
+import { admitVerifiedClient, hasPortalAccess } from "@/lib/portal-access";
 import {
   CLIENT_SESSION_MAX_AGE_SECONDS,
   clientSessionCookieName,
@@ -34,7 +35,7 @@ export const PORTAL_HOME_PATH = "/cliente/painel";
 const resolveAccount = new ResolveOAuthClientAccount(
   new PrismaClientRepository(),
   new PrismaClientOAuthAccountRepository(),
-  new PrismaUserRepository(),
+  { findByEmail: (email) => prisma.user.findUnique({ where: { email }, select: { id: true } }) },
 );
 
 const secureCookies = isSecureClientCookie();
@@ -84,6 +85,7 @@ export const { handlers, signIn } = NextAuth({
 
         // O objeto `user` segue para o callback `jwt`; aqui ele passa a ser o
         // Client resolvido, não o perfil bruto do Google.
+        if (!await admitVerifiedClient(resolved.id)) return `${PORTAL_LOGIN_PATH}?erro=acesso`;
         user.id = resolved.id;
         user.name = resolved.name;
         user.email = resolved.email;
@@ -101,7 +103,7 @@ export const { handlers, signIn } = NextAuth({
     /** Emite exatamente o payload que `decodeClientSessionToken` espera. */
     async jwt({ token, user }) {
       if (!user?.id) {
-        return token;
+        return typeof token.clientId === "string" && await hasPortalAccess(token.clientId) ? token : null;
       }
 
       const session: ClientSession = {

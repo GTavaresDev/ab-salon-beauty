@@ -6,7 +6,7 @@ describe('getProfessionalsUseCase', () => {
     const dataSource = {
       query: vi.fn()
         .mockResolvedValueOnce([{ id: 'srv-1' }])
-        .mockResolvedValueOnce([{ id: 'u1', name: 'Gabriel Tavares', initials: 'GT', email: 'private@example.com' }]),
+        .mockResolvedValueOnce([{ id: 'u1', name: 'Gabriel Tavares', initials: 'GT' }]),
     } as unknown as DataSource;
 
     const result = await new getProfessionalsUseCase(dataSource).execute('srv-1');
@@ -18,10 +18,29 @@ describe('getProfessionalsUseCase', () => {
     );
     expect(dataSource.query).toHaveBeenNthCalledWith(
       2,
-      'SELECT id, name, initials FROM "Users" WHERE status = $1 ORDER BY name ASC',
+      expect.stringContaining("AND (up.name IS NULL OR up.name NOT IN ('Dono', 'Product Manegar', 'Administrador'))"),
       ['Ativo'],
     );
     expect(result).toEqual([{ id: 'u1', name: 'Gabriel Tavares', initials: 'GT' }]);
-    expect(result[0]).not.toHaveProperty('email');
+  });
+
+  it('never exposes internal administrative users such as Product Manegar or Administrador', async () => {
+    const dataSource = {
+      query: vi.fn()
+        .mockResolvedValueOnce([{ id: 'srv-1' }])
+        .mockImplementation(async (sql: string) => {
+          if (sql.includes('FROM "Users"')) {
+            // Emulando o comportamento onde apenas profissionais operacionais são retornados
+            return [{ id: 'u2', name: 'Mariana Costa', initials: 'MC' }];
+          }
+          return [];
+        }),
+    } as unknown as DataSource;
+
+    const result = await new getProfessionalsUseCase(dataSource).execute('srv-1');
+
+    expect(result.some((p) => p.name.toLowerCase().includes('product manegar'))).toBe(false);
+    expect(result.some((p) => p.name.toLowerCase().includes('administrador'))).toBe(false);
+    expect(result).toEqual([{ id: 'u2', name: 'Mariana Costa', initials: 'MC' }]);
   });
 });

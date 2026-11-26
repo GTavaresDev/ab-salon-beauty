@@ -1,4 +1,4 @@
-import { portalClientRepository } from "@core/domain/auth/infrastructure/repositories/login/portal-client-repository";
+import { hasPortalAccess } from "./portal-access";
 import { cookies } from "next/headers";
 import type { ClientAccountDTO } from "@core/application/use-cases/login/client-account.usecase";
 import {
@@ -53,7 +53,8 @@ export async function destroyClientSession(): Promise<void> {
 export async function getClientSession(): Promise<ClientSession | null> {
   const cookieStore = await cookies();
   const raw = cookieStore.get(clientSessionCookieName())?.value;
-  return raw ? decodeClientSessionToken(raw) : null;
+  const session = raw ? await decodeClientSessionToken(raw) : null;
+  return session && await hasPortalAccess(session.clientId) ? session : null;
 }
 
 export class ClientAuthRequiredError extends Error {
@@ -69,7 +70,5 @@ export async function requireClientSession(): Promise<ClientSession> {
   if (!session) {
     throw new ClientAuthRequiredError();
   }
-  const client = await portalClientRepository.findById(session.clientId);
-  if (!client || client.status !== "Ativo") throw new ClientAuthRequiredError();
   return session;
 }

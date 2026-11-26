@@ -77,7 +77,7 @@ describe("PrismaSaleRepository — inventory-affecting transactions", () => {
       await repo.saveWithInventoryUpdate(makeSale({ quantity: 3 }), -3);
 
       expect(txMock.product.update).toHaveBeenCalledWith({
-        where: { id: "p1" },
+        where: { id: "p1", price: 10, quantity: 10 },
         data: { quantity: 7 },
       });
       expect(txMock.sale.create).toHaveBeenCalled();

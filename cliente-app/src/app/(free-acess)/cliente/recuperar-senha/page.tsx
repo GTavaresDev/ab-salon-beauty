@@ -11,7 +11,7 @@ export default function ClientPasswordResetPage() {
   return (
     <AuthShell
       title="Recuperar senha"
-      subtitle="Informe o e-mail cadastrado para receber as instruções."
+      subtitle="Preencha seu nome e e-mail para preparar o pedido pelo WhatsApp."
       footer={
         <p>
           Lembrou a senha?{" "}

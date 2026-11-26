@@ -1,14 +1,10 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { CalendarPlus, ChevronRight, Clock, ListChecks, UserRound } from "lucide-react";
 import { Badge } from "@/components/portal-ui/badge.component";
 import { Button } from "@/components/portal-ui/button.component";
 import { getMyAppointmentsController } from "@core/application/query/controller/read-appointment.controller";
-import { getClientAccountStatusAction } from "@core/application/query/controller/login/login.controller";
 import { getClientProfileStatusAction } from "@core/application/query/controller/login/login-profile.controller";
 import { CompleteProfileForm } from "../../_components/complete-profile-form.component";
-import { PASSWORD_NUDGE_COOKIE } from "../../_components/password-nudge/password-nudge";
-import { SetPasswordCard } from "../../_components/set-password-card.component";
 import {
   clientStatusLabel,
   firstName,
@@ -37,15 +33,7 @@ export default async function ClientHomePage() {
     );
   }
 
-  const [{ next }, { hasPassword }, cookieStore] = await Promise.all([
-    getMyAppointmentsController(),
-    getClientAccountStatusAction(),
-    cookies(),
-  ]);
-
-  // Decidido no servidor: dispensado não vem no HTML, então não pisca.
-  const showPasswordNudge =
-    !hasPassword && cookieStore.get(PASSWORD_NUDGE_COOKIE)?.value !== "1";
+  const { next } = await getMyAppointmentsController();
 
   return (
     <PortalShell
@@ -65,9 +53,6 @@ export default async function ClientHomePage() {
           </Link>
         </Button>
       </section>
-
-      {/* Flutuante: fica no canto, fora do fluxo do conteúdo. */}
-      {showPasswordNudge ? <SetPasswordCard /> : null}
 
       <section className="mt-8">
         <h2 className="mb-3 text-sm font-semibold text-zinc-700">Seu próximo atendimento</h2>

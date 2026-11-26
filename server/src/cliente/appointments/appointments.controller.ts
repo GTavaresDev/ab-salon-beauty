@@ -13,6 +13,8 @@ import { getProfessionalsUseCase } from './use-cases/getProfessionals.use-case.j
 import { getDateUseCase } from './use-cases/getDate.use-case.js';
 import { AppointmentOwnershipUseCase, assertSubmittedClientId } from '../../security/client/appointment-ownership.use-case.js';
 
+import { clientBooking, clientEditableScope, clientReschedule } from '../../security/client/client-appointment-transitions.js';
+
 @Controller('appointments')
 export class AppointmentsController {
   constructor(
@@ -29,10 +31,10 @@ export class AppointmentsController {
 
   @Post()
   create(@Body() input: CreateAppointmentDto, @CurrentClientAgendaActor() actor: ClientAgendaActor) {
+    if (actor.issuer === 'client') return this.createAppointment.create(clientBooking(input, actor.sub));
     return this.createAppointment.create({
       ...input,
       userId: input.userId ?? actor.sub,
-      clientId: actor.issuer === 'client' ? actor.sub : input.clientId,
     });
   }
 
@@ -67,21 +69,24 @@ export class AppointmentsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Query('clientId') clientId: string | undefined, @Body() input: UpdateAppointmentDto, @CurrentClientAgendaActor() actor: ClientAgendaActor) {
+  async update(@Param('id') id: string, @Query('clientId') clientId: string | undefined, @Body() input: UpdateAppointmentDto, @CurrentClientAgendaActor() actor: ClientAgendaActor) {
     assertSubmittedClientId(actor, input.clientId ?? clientId);
-    const ownership = actor.issuer === 'client'
-      ? this.appointmentOwnership.assertOwner(id, actor.sub)
-      : Promise.resolve();
-    return ownership.then(() => this.updateAppointment.update(id, input, clientAgendaScope(actor)));
+    if (actor.issuer === 'client') {
+      await this.appointmentOwnership.assertOwner(id, actor.sub);
+      const changes = clientReschedule(input);
+      return this.updateAppointment.update(id, changes, clientEditableScope(actor.sub));
+    }
+    return this.updateAppointment.update(id, input, clientAgendaScope(actor));
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Query('clientId') clientId: string | undefined, @CurrentClientAgendaActor() actor: ClientAgendaActor) {
+  async remove(@Param('id') id: string, @Query('clientId') clientId: string | undefined, @CurrentClientAgendaActor() actor: ClientAgendaActor) {
     assertSubmittedClientId(actor, clientId);
-    const ownership = actor.issuer === 'client'
-      ? this.appointmentOwnership.assertOwner(id, actor.sub)
-      : Promise.resolve();
-    return ownership.then(() => this.deleteAppointment.remove(id, clientAgendaScope(actor)));
+    if (actor.issuer === 'client') {
+      await this.appointmentOwnership.assertOwner(id, actor.sub);
+      return this.updateAppointment.update(id, { statusName: 'Cancelado' }, clientEditableScope(actor.sub));
+    }
+    return this.deleteAppointment.remove(id, clientAgendaScope(actor));
   }
 
 }

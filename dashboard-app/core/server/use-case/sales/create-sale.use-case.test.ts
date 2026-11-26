@@ -51,7 +51,7 @@ describe("CreateSale", () => {
   it("computes totalPrice and decrements inventory by the sold quantity", async () => {
     const saleRepo = mockSaleRepository();
     const productRepo = mockProductRepository();
-    productRepo.findById.mockResolvedValue(buildProduct({ quantity: 10 }));
+    productRepo.findById.mockResolvedValue(buildProduct({ quantity: 10, price: 15 }));
     saleRepo.saveWithInventoryUpdate.mockImplementation(async (sale) => sale);
     const useCase = new CreateSale(saleRepo, productRepo);
 

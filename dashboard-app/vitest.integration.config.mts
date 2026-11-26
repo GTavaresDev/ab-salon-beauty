@@ -4,7 +4,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["core/**/*.integration.test.ts"],
+    include: ["core/**/*.integration.test.ts", "test/**/*.integration.test.ts"],
     testTimeout: 30_000,
     hookTimeout: 120_000,
     pool: "forks",

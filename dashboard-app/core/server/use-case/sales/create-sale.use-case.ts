@@ -12,7 +12,7 @@ export class CreateSale {
   async execute(input: {
     productId: string;
     quantity: number;
-    unitPrice: number;
+    unitPrice?: number; // Compatibilidade com versões anteriores do painel.
     paymentMethod: "Pix" | "Dinheiro" | "Crédito" | "Débito" | "Transferência";
     createdById?: string;
   }): Promise<Sale> {
@@ -34,13 +34,13 @@ export class CreateSale {
       throw new Error("Quantidade deve ser maior que zero.");
     }
 
-    const totalPrice = input.unitPrice * input.quantity;
+    const totalPrice = product.price * input.quantity;
 
     const sale = new Sale({
       id: randomUUID(),
       productId: input.productId,
       quantity: input.quantity,
-      unitPrice: input.unitPrice,
+      unitPrice: product.price,
       totalPrice,
       paymentMethod: input.paymentMethod,
       createdById: input.createdById,

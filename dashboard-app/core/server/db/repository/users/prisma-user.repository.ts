@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@core/server/db/prisma";
 import { User } from "@core/application/query/interface/user.entity";
 import { UserRepository } from "@core/server/db/repository/user.repository";
+import { rolePermissionNames } from "@core/server/rule/permission-validation.business-rule";
 import { permissionNameFromRole, UserMapper } from "./user.mapper";
 import { CacheKeys, CacheTTL, getCached, invalidate } from "@core/server/cache/index";
 
@@ -105,7 +106,7 @@ export class PrismaUserRepository implements UserRepository {
         lockedUntil: raw.lockedUntil,
         commissionPercent: raw.commissionPercent,
         permissions: {
-          deleteMany: { name: { in: ["Dono", "Product Manegar", "Administrador", "Gestor", "Funcionario", "Usuario"] } },
+          deleteMany: { name: { in: rolePermissionNames } },
           create: [{ name: permissionNameFromRole(raw.role) }],
         },
       },

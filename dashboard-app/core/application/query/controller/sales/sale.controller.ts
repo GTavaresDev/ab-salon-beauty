@@ -30,14 +30,16 @@ export async function fetchSalesAction(filter?: {
 export async function createSaleAction(input: {
   productId: string;
   quantity: number;
-  unitPrice: number;
+  unitPrice?: number;
   paymentMethod: "Pix" | "Dinheiro" | "Crédito" | "Débito" | "Transferência";
 }): Promise<ActionResult<SaleProps & { formattedTotal: string; formattedUnitPrice: string }>> {
   try {
     const session = await requireSessionAction();
     const useCase = createSale;
     const created = await useCase.execute({
-      ...input,
+      productId: input.productId,
+      quantity: input.quantity,
+      paymentMethod: input.paymentMethod,
       createdById: session?.id,
     });
     return { success: true, data: created.toJSON() };

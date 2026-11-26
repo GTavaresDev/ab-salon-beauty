@@ -91,7 +91,7 @@ export class PrismaSaleRepository implements SaleRepository {
       }
 
       await tx.product.update({
-        where: { id: sale.productId },
+        where: { id: sale.productId, price: sale.unitPrice, quantity: product.quantity },
         data: { quantity: newQuantity },
       });
 

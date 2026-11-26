@@ -2,6 +2,7 @@
 
 import { createUserGateway } from "@core/server/gateway/user.gateway";
 import type { ActionResult } from "@core/application/query/interface/action.interface";
+import { canManageRole } from "@core/server/rule/permission-validation.business-rule";
 import { roleFromPermissionLevel } from "@core/server/rule/resolve-permission-level.business-rule";
 import { StaffRole, UserProps } from "@core/application/query/interface/user.entity";
 import { hashPassword } from "@core/server/auth/password";
@@ -12,7 +13,7 @@ import { formatActionError } from "@/lib/action-error-handler";
 const { users: userRepository, create: createUser, list: listUsers, update: updateUser, delete: deleteUser } = createUserGateway();
 
 function canEditUser(actorRole: StaffRole, targetRole: StaffRole): boolean {
-  if (actorRole === "Administrador") return true;
+  if (actorRole === "Administrador") return canManageRole(actorRole, targetRole);
   if (actorRole === "Gestor") return targetRole === "Funcionario";
   return false;
 }
@@ -132,7 +133,7 @@ export async function updateUserAction(input: {
 
     const targetCanEditProfile = canEditProfile(session.role, targetUser.role);
 
-    if (input.role && !targetCanEditProfile) {
+    if (input.role && (!targetCanEditProfile || !canManageRole(session.role, input.role))) {
       return {
         success: false,
         error: "Sem permissão para alterar o perfil deste usuário.",

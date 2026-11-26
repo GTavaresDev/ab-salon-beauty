@@ -4,7 +4,7 @@ import { createUserGateway } from "@core/server/gateway/user.gateway";
 import type { ActionResult } from "@core/application/query/interface/action.interface";
 import type { UserPermissionProps } from "@core/application/query/interface/user-permission.entity";
 import { requireSessionAction } from "@core/application/query/controller/users/auth.controller";
-import { canManageRole, canSharePermissions, validatePermissionGrant } from "@core/server/rule/permission-validation.business-rule";
+import { canManageRole, canSharePermissions, rolePermissionNames, validatePermissionGrant } from "@core/server/rule/permission-validation.business-rule";
 import { formatActionError } from "@/lib/action-error-handler";
 
 const { users: userRepository, permissions: permissionRepository, grantPermission, revokePermission } = createUserGateway();
@@ -81,12 +81,15 @@ export async function updateUserPermissionsAction(input: {
     const currentPermissions = await permissionRepository.findUserPermissions(input.userId);
     const currentNames = currentPermissions.map((permission) => permission.name);
 
-    for (const name of requestedNames.filter((name) => !currentNames.includes(name))) {
-      validatePermissionGrant({ role: granter.role, permissions: granter.permissions }, target.role, name);
+    const additions = requestedNames.filter((name) => !currentNames.includes(name));
+    const removals = currentNames.filter((name) => !rolePermissionNames.includes(name) && !requestedNames.includes(name));
+    for (const name of [...additions, ...removals]) {
+      validatePermissionGrant(granter, target.role, name);
+    }
+    for (const name of additions) {
       await permissionRepository.grantPermission(input.userId, name);
     }
-    for (const name of currentNames.filter((name) => !requestedNames.includes(name))) {
-      validatePermissionGrant({ role: granter.role, permissions: granter.permissions }, target.role, name);
+    for (const name of removals) {
       await permissionRepository.revokePermission(input.userId, name);
     }
 

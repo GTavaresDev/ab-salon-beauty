@@ -59,18 +59,7 @@ export interface RegisterClientAccountInput {
   password: string;
 }
 
-/**
- * Cria a conta de acesso do cliente ao portal.
- *
- * Não duplica clientes: se a clínica já cadastrou a pessoa internamente
- * (registro sem senha), a conta é vinculada ao registro existente — desde que
- * o telefone informado confira, para que ninguém assuma o cadastro alheio só
- * conhecendo o e-mail.
- *
- * O mesmo vale para quem entrou primeiro pelo Google: o cadastro manual não
- * cria uma segunda conta nem deixa definir senha por fora. A senha se define
- * dentro do portal, já autenticado (SetClientPassword).
- */
+/** Cadastros preexistentes exigem confirmação pelo canal cadastrado. */
 export class RegisterClientAccount {
   constructor(
     private clientRepository: ClientRepository,
@@ -97,7 +86,6 @@ export class RegisterClientAccount {
       );
     }
 
-    const passwordHash = await hashPassword(input.password);
     const existing = await this.clientRepository.findByEmail(email);
 
     if (existing) {
@@ -117,22 +105,16 @@ export class RegisterClientAccount {
         );
       }
 
-      if (onlyDigits(existing.phone) !== onlyDigits(phone)) {
-        throw new ClientAccountError(
-          "Não foi possível concluir o cadastro. Confira seus dados ou entre em contato com a clínica.",
-        );
-      }
-
-      existing.setPassword(passwordHash);
-      await this.clientRepository.update(existing);
-      return toDTO(existing);
+      throw new ClientAccountError(
+        "Use a opção de recuperar senha para confirmar o e-mail cadastrado e definir sua senha.",
+      );
     }
 
     const client = new Client({
       name,
       email,
       phone,
-      password: passwordHash,
+      password: await hashPassword(input.password),
       status: "Ativo",
     });
 
@@ -201,13 +183,6 @@ export class AuthenticateClient {
   }
 }
 
-/**
- * Gera e envia o link de redefinição de senha.
- *
- * Nunca revela se o e-mail existe: cliente inexistente ou sem senha (login só
- * Google) simplesmente não gera token nem manda e-mail — o chamador responde
- * a mesma mensagem de sucesso de qualquer forma.
- */
 export class RequestClientPasswordReset {
   constructor(
     private clientRepository: ClientRepository,
@@ -215,18 +190,22 @@ export class RequestClientPasswordReset {
     private sendEmail: (input: { to: string; resetUrl: string }) => Promise<void>,
   ) {}
 
-  async execute(email: string, baseUrl: string): Promise<void> {
+  async execute(email: string, baseUrl: string, origin: string): Promise<void> {
     const client = await this.clientRepository.findByEmail(normalizeEmail(email));
-    if (!client || !client.password || client.status !== "Ativo") {
+    if (!client || client.status !== "Ativo") {
       return;
     }
 
     const token = crypto.randomBytes(32).toString("hex");
-    await this.resetTokenRepository.create({
+    const issued = await this.resetTokenRepository.issue({
+      issuedEmail: client.email,
+      originHash: crypto.createHash("sha256").update(origin).digest("hex"),
       clientId: client.id,
       tokenHash: hashResetToken(token),
       expiresAt: new Date(Date.now() + PASSWORD_RESET_TOKEN_TTL_MS),
     });
+
+    if (!issued) return;
 
     await this.sendEmail({
       to: client.email,
@@ -254,12 +233,12 @@ export class GetClientEmailByResetToken {
 /** Troca a senha a partir de um token de redefinição válido (não requer sessão). */
 export class ResetClientPassword {
   constructor(
-    private clientRepository: ClientRepository,
     private resetTokenRepository: ClientPasswordResetTokenRepository,
   ) {}
 
   async execute(token: string, password: string): Promise<void> {
-    const match = await this.resetTokenRepository.findValidByTokenHash(hashResetToken(token));
+    const tokenHash = hashResetToken(token);
+    const match = await this.resetTokenRepository.findValidByTokenHash(tokenHash);
     if (!match) {
       throw new ClientAccountError("Link inválido ou expirado. Solicite a recuperação novamente.");
     }
@@ -270,13 +249,9 @@ export class ResetClientPassword {
       );
     }
 
-    const client = await this.clientRepository.findById(match.clientId);
-    if (!client || client.status !== "Ativo") {
+    const changed = await this.resetTokenRepository.consume(match.clientId, tokenHash, await hashPassword(password));
+    if (!changed) {
       throw new ClientAccountError("Link inválido ou expirado. Solicite a recuperação novamente.");
     }
-
-    client.setPassword(await hashPassword(password));
-    await this.clientRepository.update(client);
-    await this.resetTokenRepository.invalidateAllForClient(client.id);
   }
 }

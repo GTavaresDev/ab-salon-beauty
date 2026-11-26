@@ -21,7 +21,7 @@ export function createLoginFactory() {
     authenticateClient: new AuthenticateClient(clients),
     registerClient: new RegisterClientAccount(clients, oauthAccounts),
     requestPasswordReset: (sendEmail: (input: { to: string; resetUrl: string }) => Promise<void>) => new RequestClientPasswordReset(clients, resetTokens, sendEmail),
-    resetPassword: new ResetClientPassword(clients, resetTokens),
+    resetPassword: new ResetClientPassword(resetTokens),
     setPassword: new SetClientPassword(clients),
     getClientEmailByResetToken: new GetClientEmailByResetToken(clients, resetTokens),
     completeProfile: new CompleteClientProfile(clients),

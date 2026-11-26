@@ -6,7 +6,9 @@ import {
   createParamDecorator,
 } from '@nestjs/common';
 import { createPublicKey, verify } from 'node:crypto';
-import { Raw } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { hasPortalAccess } from './portal-access.js';
+import { DataSource, Raw } from 'typeorm';
 
 export type ClientAgendaActor = {
   sub: string;
@@ -35,7 +37,9 @@ export function clientAgendaScope(actor: ClientAgendaActor) {
 
 @Injectable()
 export class ClientAgendaGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
+  constructor(@InjectDataSource() private readonly db: DataSource) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     if (request.path === '/auth/token') return true;
 
@@ -69,6 +73,7 @@ export class ClientAgendaGuard implements CanActivate {
         payload.exp <= now || payload.exp - payload.iat > 1200
       ) throw new Error();
 
+      if (payload.iss === 'client' && !await hasPortalAccess(this.db, payload.sub)) throw new Error();
       request.clientAgendaActor = {
         sub: payload.sub,
         issuer: payload.iss,

@@ -70,7 +70,16 @@ model Product {
   @@map("Products")
 }
 
+enum PortalAccess {
+  WAITING
+  IN_REVIEW
+  APPROVED
+}
+
 model Client {
+  portalAccess PortalAccess @default(WAITING)
+  portalApprovedAt DateTime?
+  portalApprovedById String?
   id           String        @id @default(uuid())
   name         String
   email        String        @unique
@@ -110,11 +119,15 @@ model ClientPasswordResetToken {
   id        String    @id @default(uuid())
   clientId  String
   client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  issuedEmail String?
+  originHash String?
   tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
 
+  @@index([clientId, createdAt])
+  @@index([originHash, createdAt])
   @@index([clientId])
   @@map("ClientPasswordResetTokens")
 }

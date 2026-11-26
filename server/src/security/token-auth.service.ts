@@ -1,3 +1,4 @@
+import { hasPortalAccess } from './client/portal-access.js';
 import { Injectable, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createPrivateKey, createSign, randomBytes, scrypt as nodeScrypt, timingSafeEqual } from 'node:crypto';
@@ -19,11 +20,7 @@ export class TokenAuthService {
     const token = await this.findMatchingToken(records, secret);
     if (!token) throw new UnauthorizedException('Credencial inválida.');
 
-    const [client] = await this.dataSource.query(
-      'SELECT id FROM "Clients" WHERE id = $1 AND status = $2',
-      [userId, 'Ativo'],
-    );
-    if (!client) throw new UnauthorizedException('Usuário inválido.');
+    if (!await hasPortalAccess(this.dataSource, userId)) throw new UnauthorizedException('Usuário inválido.');
 
     const privateKeyValue = process.env.CLIENT_AGENDA_JWT_PRIVATE_KEY;
     const keyId = process.env.CLIENT_AGENDA_JWT_KID;

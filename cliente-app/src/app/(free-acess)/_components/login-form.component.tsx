@@ -6,6 +6,9 @@ import { Button } from "@/components/portal-ui/button.component";
 import { FieldLabel } from "@/components/portal-ui/field-label.component";
 import { Input } from "@/components/portal-ui/input.component";
 
+import { PortalPendingNotice } from "./portal-pending-notice.component";
+import { portalOAuthErrorMessage } from "./portal-oauth-error/portal-oauth-error";
+
 export function LoginForm() {
   const {
     email,
@@ -56,7 +59,9 @@ export function LoginForm() {
         </div>
       </div>
 
-      {error ? (
+      {error === portalOAuthErrorMessage("acesso") ? (
+        <PortalPendingNotice />
+      ) : error ? (
         <p className="text-sm font-medium text-red-600" role="alert">
           {error}
         </p>

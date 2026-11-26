@@ -8,6 +8,10 @@ const ROLE_HIERARCHY: Record<StaffRole, number> = {
   'Funcionario': 3,
 };
 
+export const rolePermissionNames = [
+  "Dono", "Product Manegar", "Administrador", "Gestor", "Funcionario", "Usuario",
+];
+
 export class PermissionValidationError extends Error {
   constructor(message: string) {
     super(message);
@@ -56,6 +60,10 @@ export function validatePermissionGrant(
   targetRole: StaffRole,
   permissionName: string
 ): void {
+  if (rolePermissionNames.includes(permissionName.trim())) {
+    throw new PermissionValidationError('Papéis só podem ser alterados pela gestão de perfis.');
+  }
+
   // User must have permission sharing ability
   if (!canSharePermissions(granterContext)) {
     throw new PermissionValidationError(

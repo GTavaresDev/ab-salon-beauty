@@ -13,6 +13,7 @@ export function useCompleteProfileForm({ profile }: { profile: ClientProfileStat
     phone: formatPhoneBR(profile.phone),
     birthDate: profile.birthDate,
   });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -38,6 +39,8 @@ export function useCompleteProfileForm({ profile }: { profile: ClientProfileStat
   const today = new Date().toISOString().slice(0, 10);
   return {
     form,
+    acceptedTerms,
+    setAcceptedTerms,
     error,
     loading,
     update,

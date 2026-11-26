@@ -1,3 +1,4 @@
+import { DataSource } from 'typeorm';
 import { generateKeyPairSync, sign } from 'node:crypto';
 import { Controller, Get, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
@@ -28,7 +29,7 @@ describe('ClientAgendaGuard', () => {
     }));
     const module = await Test.createTestingModule({ controllers: [GuardRoutes] }).compile();
     app = module.createNestApplication();
-    app.useGlobalGuards(new ClientAgendaGuard());
+    app.useGlobalGuards(new ClientAgendaGuard(new DataSource({ type: 'postgres' })));
     await app.init();
   });
 

@@ -1,6 +1,7 @@
 import type { PortalOAuthErrorCode } from "@core/application/use-cases/login/google-account-link.usecase";
 
 const MESSAGES: Record<PortalOAuthErrorCode, string> = {
+  acesso: "Seu cadastro foi concluído com sucesso e está em análise! Assim que ele for aprovado, seu acesso ao sistema será liberado.",
   email_nao_verificado:
     "O Google não confirmou este e-mail. Entre com e-mail e senha ou verifique seu e-mail no Google.",
   conta_desativada:

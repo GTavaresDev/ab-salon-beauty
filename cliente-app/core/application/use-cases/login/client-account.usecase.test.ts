@@ -23,10 +23,9 @@ function oauthAccountsLinkedToGoogle(linked: boolean): Mocked<ClientOAuthAccount
 
 function mockResetTokenRepository(): Mocked<ClientPasswordResetTokenRepository> {
   return {
-    create: vi.fn(),
+    issue: vi.fn().mockResolvedValue(true),
     findValidByTokenHash: vi.fn().mockResolvedValue(null),
-    markUsed: vi.fn(),
-    invalidateAllForClient: vi.fn(),
+    consume: vi.fn().mockResolvedValue(true),
   } as unknown as Mocked<ClientPasswordResetTokenRepository>;
 }
 
@@ -55,20 +54,6 @@ describe("RegisterClientAccount", () => {
       email: "maria@example.com",
       initials: "MS",
     });
-  });
-
-  it("não duplica cliente: assume o cadastro existente sem senha", async () => {
-    const repo = mockClientRepository();
-    repo.findByEmail.mockResolvedValue(
-      buildClient({ id: "c1", email: "maria@example.com", phone: "11999999999" }),
-    );
-
-    const account = await new RegisterClientAccount(repo).execute(input);
-
-    expect(repo.save).not.toHaveBeenCalled();
-    expect(repo.update).toHaveBeenCalledTimes(1);
-    expect(repo.update.mock.calls[0][0].password).toMatch(/^\$2[aby]\$/);
-    expect(account.id).toBe("c1");
   });
 
   it("recusa assumir cadastro existente quando o telefone não confere", async () => {
@@ -250,11 +235,11 @@ describe("RequestClientPasswordReset", () => {
 
     await new RequestClientPasswordReset(repo, tokenRepo, sendEmail).execute(
       "MARIA@example.com",
-      "https://app.example.com",
+      "https://app.example.com", "origem-ficticia",
     );
 
-    expect(tokenRepo.create).toHaveBeenCalledTimes(1);
-    const created = tokenRepo.create.mock.calls[0][0];
+    expect(tokenRepo.issue).toHaveBeenCalledTimes(1);
+    const created = tokenRepo.issue.mock.calls[0][0];
     expect(created.clientId).toBe("c1");
     expect(created.expiresAt.getTime()).toBeGreaterThan(Date.now());
     expect(sendEmail).toHaveBeenCalledTimes(1);
@@ -262,7 +247,7 @@ describe("RequestClientPasswordReset", () => {
     expect(sendEmail.mock.calls[0][0].resetUrl).toContain("https://app.example.com/cliente/redefinir-senha?token=");
   });
 
-  it("não gera token nem envia e-mail para cliente inexistente, sem senha ou inativo", async () => {
+  it("não gera token nem envia e-mail para cliente inexistente ou inativo", async () => {
     const tokenRepo = mockResetTokenRepository();
     const sendEmail = vi.fn();
 
@@ -270,14 +255,7 @@ describe("RequestClientPasswordReset", () => {
     repoNoClient.findByEmail.mockResolvedValue(null);
     await new RequestClientPasswordReset(repoNoClient, tokenRepo, sendEmail).execute(
       "ninguem@example.com",
-      "https://app.example.com",
-    );
-
-    const repoNoPassword = mockClientRepository();
-    repoNoPassword.findByEmail.mockResolvedValue(buildClient({ password: null }));
-    await new RequestClientPasswordReset(repoNoPassword, tokenRepo, sendEmail).execute(
-      "maria@example.com",
-      "https://app.example.com",
+      "https://app.example.com", "origem-ficticia",
     );
 
     const repoInactive = mockClientRepository();
@@ -286,10 +264,10 @@ describe("RequestClientPasswordReset", () => {
     );
     await new RequestClientPasswordReset(repoInactive, tokenRepo, sendEmail).execute(
       "maria@example.com",
-      "https://app.example.com",
+      "https://app.example.com", "origem-ficticia",
     );
 
-    expect(tokenRepo.create).not.toHaveBeenCalled();
+    expect(tokenRepo.issue).not.toHaveBeenCalled();
     expect(sendEmail).not.toHaveBeenCalled();
   });
 });
@@ -319,38 +297,34 @@ describe("GetClientEmailByResetToken", () => {
 
 describe("ResetClientPassword", () => {
   it("troca a senha e invalida o token usado", async () => {
-    const repo = mockClientRepository();
     const tokenRepo = mockResetTokenRepository();
-    const client = buildClient({ id: "c1", password: "$2a$12$old" });
     tokenRepo.findValidByTokenHash.mockResolvedValue({ clientId: "c1" });
-    repo.findById.mockResolvedValue(client);
 
-    await new ResetClientPassword(repo, tokenRepo).execute("token-bruto", "nova-senha-longa");
+    await new ResetClientPassword(tokenRepo).execute("token-bruto", "nova-senha-longa");
 
-    expect(repo.update).toHaveBeenCalledTimes(1);
-    expect(await verifyPassword("nova-senha-longa", client.password!)).toBe(true);
-    expect(tokenRepo.invalidateAllForClient).toHaveBeenCalledWith("c1");
+    expect(tokenRepo.consume).toHaveBeenCalledTimes(1);
+    const [id, , hash] = tokenRepo.consume.mock.calls[0];
+    expect(id).toBe("c1");
+    expect(await verifyPassword("nova-senha-longa", hash)).toBe(true);
   });
 
   it("recusa token inválido ou expirado", async () => {
-    const repo = mockClientRepository();
     const tokenRepo = mockResetTokenRepository();
     tokenRepo.findValidByTokenHash.mockResolvedValue(null);
 
     await expect(
-      new ResetClientPassword(repo, tokenRepo).execute("token-ruim", "nova-senha-longa"),
+      new ResetClientPassword(tokenRepo).execute("token-ruim", "nova-senha-longa"),
     ).rejects.toThrow(/inválido ou expirado/i);
-    expect(repo.update).not.toHaveBeenCalled();
+    expect(tokenRepo.consume).not.toHaveBeenCalled();
   });
 
   it("recusa senha curta", async () => {
-    const repo = mockClientRepository();
     const tokenRepo = mockResetTokenRepository();
     tokenRepo.findValidByTokenHash.mockResolvedValue({ clientId: "c1" });
 
     await expect(
-      new ResetClientPassword(repo, tokenRepo).execute("token-bruto", "123"),
+      new ResetClientPassword(tokenRepo).execute("token-bruto", "123"),
     ).rejects.toThrow(/pelo menos 8/i);
-    expect(repo.update).not.toHaveBeenCalled();
+    expect(tokenRepo.consume).not.toHaveBeenCalled();
   });
 });

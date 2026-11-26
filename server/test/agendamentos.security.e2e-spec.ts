@@ -64,9 +64,9 @@ describe('Segurança e2e de agendamentos', () => {
     clientA = { id: `e2e-client-a-${randomUUID()}`, email: `e2e-a-${randomUUID()}@example.test` };
     clientB = { id: `e2e-client-b-${randomUUID()}`, email: `e2e-b-${randomUUID()}@example.test` };
     await dataSource.query(
-      `INSERT INTO "Clients" (id, name, email, phone, status, initials, "createdAt", "updatedAt")
-       VALUES ($1, 'Cliente E2E A', $2, '000000000', 'Ativo', 'EA', NOW(), NOW()),
-              ($3, 'Cliente E2E B', $4, '000000001', 'Ativo', 'EB', NOW(), NOW())`,
+      `INSERT INTO "Clients" (id, name, email, phone, status, "portalAccess", initials, "createdAt", "updatedAt")
+       VALUES ($1, 'Cliente E2E A', $2, '000000000', 'Ativo', 'APPROVED', 'EA', NOW(), NOW()),
+              ($3, 'Cliente E2E B', $4, '000000001', 'Ativo', 'APPROVED', 'EB', NOW(), NOW())`,
       [clientA.id, clientA.email, clientB.id, clientB.email],
     );
     appointmentA = randomUUID();

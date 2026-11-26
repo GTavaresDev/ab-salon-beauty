@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "node",
-    include: ["core/**/*.test.{ts,tsx}", "src/**/*.test.{ts,tsx}"],
+    include: ["test/**/*.test.ts", "core/**/*.test.{ts,tsx}", "src/**/*.test.{ts,tsx}"],
     exclude: ["node_modules", ".next", "e2e", "**/*.integration.test.ts"],
     setupFiles: ["./vitest.setup.ts"],
     restoreMocks: true,

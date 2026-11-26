@@ -1,7 +1,6 @@
 import { Client } from "@core/domain/auth/entities/client.entity";
 import { ClientOAuthAccountRepository } from "@core/domain/auth/repositories/client-oauth-account.repository";
 import { ClientRepository } from "@core/domain/auth/repositories/client.repository";
-import { UserRepository } from "@core/domain/auth/repositories/user.repository";
 import {
   normalizeEmail,
   toClientAccountDTO,
@@ -18,6 +17,7 @@ export type PortalOAuthErrorCode =
   | "email_nao_verificado"
   | "conta_desativada"
   | "conta_indisponivel"
+  | "acesso"
   | "falha";
 
 export class PortalOAuthError extends Error {
@@ -60,7 +60,7 @@ export class ResolveOAuthClientAccount {
   constructor(
     private clientRepository: ClientRepository,
     private oauthAccountRepository: ClientOAuthAccountRepository,
-    private userRepository: UserRepository,
+    private userRepository: { findByEmail(email: string): Promise<{ id: string } | null> },
   ) {}
 
   async execute(identity: OAuthIdentity): Promise<ClientAccountDTO> {

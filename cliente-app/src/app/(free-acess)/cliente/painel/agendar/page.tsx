@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default async function BookingPage() {
   const session = await requireCompletePortalSession();
   // Serviços chegam sem preço: o DTO do portal não carrega valores.
-  const services = await getServicesController();
+  const result = await getServicesController();
 
   return (
     <PortalShell
@@ -18,7 +18,13 @@ export default async function BookingPage() {
       title="Novo agendamento"
       subtitle="Escolha o serviço e o horário ideal para o seu atendimento."
     >
-      <BookingWizard services={services} />
+      {result.success ? (
+        <BookingWizard services={result.data} />
+      ) : (
+        <p role="alert" className="rounded-2xl border border-zinc-200 bg-white p-5 text-sm text-zinc-700">
+          {result.error}
+        </p>
+      )}
     </PortalShell>
   );
 }

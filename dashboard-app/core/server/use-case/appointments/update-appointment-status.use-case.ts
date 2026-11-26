@@ -21,6 +21,10 @@ export class UpdateAppointmentStatus {
     if (!existing || !canManageAppointment(actor, existing)) {
       throw new Error("Agendamento não encontrado.");
     }
+    const paymentMethods = ["Pix", "Dinheiro", "Crédito", "Débito", "Transferência", "Outro"];
+    if (status === "Concluído" && paymentMethod && !paymentMethods.includes(paymentMethod)) {
+      throw new Error("Forma de pagamento inválida.");
+    }
     if (status === "Concluído" && !paymentMethod && !existing.paymentMethod) {
       throw new Error("Informe a forma de pagamento para concluir o atendimento.");
     }

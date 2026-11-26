@@ -15,6 +15,7 @@ import { Pencil, Plus, Search, Trash2, MoreVertical, Power, ChevronDown, Sparkle
 import { TABLE_BODY_MIN_HEIGHT_CLASS } from "@/lib/pagination";
 import { ServiceModal } from "@/app/(agendamentos)/(left-nav-bar)/servicos/_components/service-modal.component";
 import { cn } from "@/lib/utils";
+import { shouldOpenActionMenuUp } from "@/lib/action-menu-placement";
 
 export function Services({
   showToast,
@@ -167,7 +168,7 @@ export function Services({
                       <MoreVertical className="size-4" />
                     </button>
                     {openMenuId === service.id && (
-                      <div className={cn("absolute right-0 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl", itemIndex >= items.length - 2 ? "bottom-8" : "top-8")}>
+                      <div className={cn("absolute right-0 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl", shouldOpenActionMenuUp(itemIndex, items.length) ? "bottom-8" : "top-8")}>
                         <button
                           type="button"
                           onClick={() => {

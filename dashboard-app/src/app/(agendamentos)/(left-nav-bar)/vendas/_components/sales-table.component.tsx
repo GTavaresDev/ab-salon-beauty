@@ -10,6 +10,7 @@ import { ListPagination } from "@/app/(agendamentos)/(left-nav-bar)/_components/
 import { cn } from "@/lib/utils";
 import { TABLE_BODY_MIN_HEIGHT_CLASS } from "@/lib/pagination";
 import { PAYMENT_METHODS, type ExtendedSale } from "./sales.component";
+import { shouldOpenActionMenuUp } from "@/lib/action-menu-placement";
 
 export function SalesTable({
   saleList,
@@ -131,7 +132,7 @@ export function SalesTable({
                   <MoreVertical className="size-4" />
                 </button>
                 {openMenuId === sale.id && (
-                  <div className={`absolute right-0 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl ${itemIndex >= pagedSales.length - 2 ? "bottom-8" : "top-8"}`}>
+                  <div className={`absolute right-0 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl ${shouldOpenActionMenuUp(itemIndex, pagedSales.length) ? "bottom-8" : "top-8"}`}>
                     <button
                       type="button"
                       onClick={() => {

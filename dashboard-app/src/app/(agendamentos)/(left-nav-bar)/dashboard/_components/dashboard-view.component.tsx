@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { appointmentAttendantLabel } from "@/lib/appointment-attendant";
 import { resolveServiceColor } from "@/lib/service-color";
 import { getStatusBadgeVariant } from "@/lib/appointment-status";
+import { shouldOpenActionMenuUp } from "@/lib/action-menu-placement";
 import { dateToIsoString } from "@/lib/week-generator";
 import { StatCard } from "./stat-card.component";
 import { PendingAppointmentsModal } from "./pending-appointments-modal.component";
@@ -337,7 +338,7 @@ export function DashboardView() {
                         <MoreVertical className="size-4" />
                       </button>
                       {openMenuId === item.id && (
-                        <div className={cn("absolute right-0 z-50 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl", itemIndex >= displayedAppointments.length - 2 ? "bottom-10" : "top-10")}>
+                        <div className={cn("absolute right-0 z-50 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl", shouldOpenActionMenuUp(itemIndex, displayedAppointments.length) ? "bottom-10" : "top-10")}>
                           {isPending ? (
                             <>
                               <button

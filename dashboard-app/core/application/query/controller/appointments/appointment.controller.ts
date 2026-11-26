@@ -7,6 +7,8 @@ import { durationLabelFromMinutes } from "@core/server/rule/appointment-duration
 import { AppointmentProps } from "@core/application/query/interface/appointment.entity";
 import { requireSessionAction } from "@core/application/query/controller/users/auth.controller";
 import { formatActionError } from "@/lib/action-error-handler";
+import { canManageAppointment } from "@core/server/rule/appointment-access.business-rule";
+import { prisma } from "@core/server/db/prisma";
 
 const { appointments: appointmentRepository, services: serviceRepository, list: listAppointments, create: createAppointment, updateStatus, delete: deleteAppointment, occupiedSlots } = createAppointmentGateway();
 
@@ -68,6 +70,33 @@ export async function updateAppointmentStatusAction(
     return { success: true, data: updated.toJSON() };
   } catch (error: unknown) {
     return { success: false, error: formatActionError(error, "Erro ao atualizar agendamento.") };
+  }
+}
+
+export async function dismissAppointmentReviewAction(id: string): Promise<ActionResult<void>> {
+  try {
+    const actor = await requireSessionAction();
+    const appointment = await appointmentRepository.findById(id);
+    if (!appointment || !canManageAppointment(actor, appointment)) {
+      throw new Error("Agendamento não encontrado.");
+    }
+    if (appointment.status !== "Concluído" || !appointment.clientId || !appointment.userId) {
+      throw new Error("Este atendimento não pode ser dispensado para pesquisa.");
+    }
+
+    await prisma.appointmentReview.upsert({
+      where: { appointmentId: id },
+      create: {
+        appointmentId: id,
+        clientId: appointment.clientId,
+        attendantId: appointment.userId,
+        dismissedAt: new Date(),
+      },
+      update: { dismissedAt: new Date() },
+    });
+    return { success: true };
+  } catch (error: unknown) {
+    return { success: false, error: formatActionError(error, "Não foi possível dispensar a pesquisa.") };
   }
 }
 

@@ -8,6 +8,8 @@ import { Card, CardHeader, CardTitle } from "@/app/(agendamentos)/(left-nav-bar)
 import { cn } from "@/lib/utils";
 import { UserProps } from "@core/application/query/interface/user.entity";
 import type { StaffRole } from "@core/application/query/interface/user.entity";
+import { shouldOpenActionMenuUp } from "@/lib/action-menu-placement";
+import { useEffect, useRef } from "react";
 
 export function UsersTable({
   pagedUsers,
@@ -44,6 +46,20 @@ export function UsersTable({
     openMenuId,
     setOpenMenuId,
   } = useUsersTable({ pagedUsers, filteredCount, statusFilter, onStatusFilterChange, roleFilter, onRoleFilterChange, page, onPageChange, currentUserRole, canEditUser, onEditUser, onUpdateUser, onDeleteUser, showToast });
+  const actionMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!actionMenuRef.current?.contains(event.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [openMenuId, setOpenMenuId]);
 
   return (
     <Card className="overflow-visible">
@@ -104,7 +120,7 @@ export function UsersTable({
             (currentUserRole === "Gestor" && !isTargetAdmin && !isTargetManager);
 
           const actionMenuNode = canModify ? (
-            <div className="relative">
+            <div ref={openMenuId === user.id ? actionMenuRef : undefined} className="relative">
               <button
                 type="button"
                 onClick={() =>
@@ -115,7 +131,7 @@ export function UsersTable({
                 <MoreVertical className="size-4" />
               </button>
               {openMenuId === user.id && (
-                <div className={`absolute right-0 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl ${itemIndex >= pagedUsers.length - 2 ? "bottom-8" : "top-8"}`}>
+                <div className={`fixed right-12 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl ${shouldOpenActionMenuUp(itemIndex, pagedUsers.length) ? "bottom-[calc(100vh-32rem)]" : "top-8"}`}>
                   <button
                     type="button"
                     onClick={() => {

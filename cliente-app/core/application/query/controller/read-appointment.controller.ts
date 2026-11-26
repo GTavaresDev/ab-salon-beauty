@@ -28,7 +28,7 @@ export async function getPendingReviewsAction(): Promise<PendingAppointmentRevie
         clientId: session.clientId,
         status: "Concluído",
         userId: { not: null },
-        OR: [{ review: null }, { review: { is: { rating: null } } }],
+        OR: [{ review: null }, { review: { is: { rating: null, dismissedAt: null } } }],
       },
       select: { id: true, date: true, time: true, user: { select: { name: true } } },
       orderBy: [{ date: "desc" }, { time: "desc" }],

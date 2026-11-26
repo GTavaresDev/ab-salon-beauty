@@ -7,6 +7,16 @@ export interface AppointmentWhatsAppParams {
   serviceName?: string | null;
 }
 
+export function buildAppointmentReviewWhatsAppMessage(params: AppointmentWhatsAppParams & { appointmentId: string }): string {
+  const attendant = params.professionalName?.trim() || "nossa equipe";
+  return `Olá, ${params.clientName?.trim() || "usuário"}! Gostaríamos de saber como você avalia o atendimento de ${attendant} em ${formatWhatsAppDate(params.date)}. Deixe uma nota de 1 a 5 do seu nível de satisfação.\n\nOpções: 1, 2, 3, 4 ou 5.\n\nAvalie pelo portal: https://cliente.absalonbeauty.com.br/cliente/painel?avaliar=${encodeURIComponent(params.appointmentId)}`;
+}
+
+export function buildAppointmentReviewWhatsAppUrl(params: AppointmentWhatsAppParams & { appointmentId: string }): string {
+  const phone = formatWhatsAppPhone(params.phone);
+  return `https://wa.me/${phone}?text=${encodeURIComponent(buildAppointmentReviewWhatsAppMessage(params))}`;
+}
+
 /**
  * Normaliza o número de telefone para o padrão do WhatsApp internacional (wa.me/55...).
  * Se o número brasileiro possuir 10 ou 11 dígitos, adiciona o DDI 55.

@@ -5,9 +5,55 @@ import {
   buildAppointmentConfirmationMessage,
   buildAppointmentWhatsAppUrl,
   openWhatsAppConfirmation,
+  buildAppointmentReviewWhatsAppMessage,
+  buildAppointmentReviewWhatsAppUrl,
+  buildAppointmentCancellationMessage,
+  buildAppointmentCancellationWhatsAppUrl,
 } from "./whatsapp-helper";
 
 describe("whatsapp-helper", () => {
+  it("builds a cancellation message with the appointment details and a WhatsApp URL", () => {
+    const params = {
+      phone: "(62) 99999-9999",
+      clientName: "Gabriel Tavares",
+      professionalName: "Mariana Costa",
+      serviceName: "Consulta Inicial",
+      date: "2026-11-26",
+      time: "15:00",
+    };
+    expect(buildAppointmentCancellationMessage(params)).toContain("Gabriel Tavares");
+    expect(buildAppointmentCancellationMessage(params)).toContain("26/11/2026");
+    expect(decodeURIComponent(buildAppointmentCancellationWhatsAppUrl(params))).toContain("Consulta Inicial");
+    expect(buildAppointmentCancellationWhatsAppUrl(params)).toMatch(/^https:\/\/wa\.me\/5562999999999\?text=/);
+  });
+
+  it("builds the satisfaction survey message with the portal link", () => {
+    const message = buildAppointmentReviewWhatsAppMessage({
+      appointmentId: "appointment-1",
+      clientName: "Gabriel Tavares",
+      professionalName: "Mariana Costa",
+      date: "2026-11-26",
+      time: "15:00",
+    });
+    expect(message).toContain("Olá, Gabriel Tavares!");
+    expect(message).toContain("atendimento de Mariana Costa em 26/11/2026");
+    expect(message).toContain("nota de 1 a 5");
+    expect(message).toContain("https://cliente.absalonbeauty.com.br/cliente/painel?avaliar=appointment-1");
+  });
+
+  it("creates the satisfaction survey WhatsApp URL with the client phone", () => {
+    const url = buildAppointmentReviewWhatsAppUrl({
+      appointmentId: "appointment-1",
+      phone: "(62) 99999-9999",
+      clientName: "Gabriel",
+      professionalName: "Mariana",
+      date: "2026-11-26",
+      time: "15:00",
+    });
+    expect(url).toMatch(/^https:\/\/wa\.me\/5562999999999\?text=/);
+    expect(decodeURIComponent(url)).toContain("cliente.absalonbeauty.com.br");
+  });
+
   describe("formatWhatsAppPhone", () => {
     it("deve retornar vazio se não houver telefone", () => {
       expect(formatWhatsAppPhone(null)).toBe("");

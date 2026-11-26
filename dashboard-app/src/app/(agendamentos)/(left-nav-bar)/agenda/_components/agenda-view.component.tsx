@@ -31,6 +31,7 @@ import { getStatusBadgeVariant } from "@/lib/appointment-status";
 import { AppointmentProps } from "@core/application/query/interface/appointment.entity";
 import { appointmentAttendantLabel } from "@/lib/appointment-attendant";
 import { PendingAppointmentsModal } from "@/app/(agendamentos)/(left-nav-bar)/dashboard/_components/pending-appointments-modal.component";
+import { shouldOpenActionMenuUp } from "@/lib/action-menu-placement";
 
 export function AgendaView({
   appointments,
@@ -243,7 +244,7 @@ export function AgendaView({
                     <MoreVertical className="size-4" />
                   </button>
                   {openMenuId === item.id && (
-                    <div className={cn("absolute right-0 z-50 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl", itemIndex >= pagedAppointments.length - 2 ? "bottom-8" : "top-8")}>
+                    <div className={cn("absolute right-0 z-50 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl", shouldOpenActionMenuUp(itemIndex, pagedAppointments.length) ? "bottom-8" : "top-8")}>
                       {isPending ? (
                         <>
                           <button

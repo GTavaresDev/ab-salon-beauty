@@ -15,6 +15,8 @@ const rawBase = {
   userId: null,
   clientId: null,
   serviceId: null,
+  commissionPercent: null,
+  paymentMethod: null,
   createdAt: new Date("2026-01-01"),
   updatedAt: new Date("2026-01-02"),
 };
@@ -23,7 +25,7 @@ describe("AppointmentMapper.toDomain", () => {
   it("maps relation fields when present", () => {
     const appointment = AppointmentMapper.toDomain({
       ...rawBase,
-      user: { name: "João", role: "Gestor" },
+      user: { name: "João", permissions: [{ name: "Gestor", enabled: true }] },
       serviceRecord: { price: 60, color: "#fff" },
     });
 
@@ -40,6 +42,12 @@ describe("AppointmentMapper.toDomain", () => {
     expect(appointment.userRole).toBeNull();
     expect(appointment.servicePrice).toBeNull();
     expect(appointment.serviceColor).toBeNull();
+  });
+
+  it("maps payment method from persistence", () => {
+    const appointment = AppointmentMapper.toDomain({ ...rawBase, paymentMethod: "Pix", commissionPercent: 25 });
+    expect(appointment.paymentMethod).toBe("Pix");
+    expect(appointment.commissionPercent).toBe(25);
   });
 });
 
@@ -64,6 +72,7 @@ describe("AppointmentMapper.toPersistence", () => {
       clientId: null,
       serviceId: null,
       commissionPercent: null,
+      paymentMethod: null,
     });
   });
 });

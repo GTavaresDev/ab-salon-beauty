@@ -6,6 +6,7 @@ import {
   createAppointmentAction,
   deleteAppointmentAction,
   fetchAppointmentsAction,
+  dismissAppointmentReviewAction,
   updateAppointmentStatusAction,
 } from "@core/application/query/controller/appointments/appointment.controller";
 import { AppointmentProps } from "@core/application/query/interface/appointment.entity";
@@ -19,6 +20,7 @@ export interface AppointmentsContextType {
   surveySuggestion: AppointmentProps | null;
   paymentAppointment: AppointmentProps | null;
   closeSurveySuggestion: () => void;
+  dismissSurveySuggestion: () => Promise<boolean>;
   closePaymentModal: () => void;
   submitAppointmentPaymentMethod: (method: AppointmentPaymentMethod) => Promise<boolean>;
   isLoading: boolean;
@@ -202,11 +204,23 @@ export function useAppointmentsState(): AppointmentsContextType {
     setAppointmentList((prev) => prev.filter((a) => a.id !== id));
   }
 
+  async function dismissSurveySuggestion(): Promise<boolean> {
+    if (!surveySuggestion) return false;
+    const result = await dismissAppointmentReviewAction(surveySuggestion.id);
+    if (!result.success) {
+      showToast(result.error || "Não foi possível dispensar a pesquisa.");
+      return false;
+    }
+    setSurveySuggestion(null);
+    return true;
+  }
+
   return {
     appointmentList,
     surveySuggestion,
     paymentAppointment,
     closeSurveySuggestion: () => setSurveySuggestion(null),
+    dismissSurveySuggestion,
     closePaymentModal: () => setPaymentAppointment(null),
     submitAppointmentPaymentMethod: (method: AppointmentPaymentMethod) => paymentAppointment
       ? persistAppointmentStatusChange(paymentAppointment.id, "Concluído", method)
@@ -238,6 +252,7 @@ export function AppointmentsProvider({ children }: { children: ReactNode }) {
       value.surveySuggestion ? createElement(SurveySuggestionModal, {
         appointment: value.surveySuggestion,
         onClose: value.closeSurveySuggestion,
+        onDismiss: value.dismissSurveySuggestion,
       }) : null,
     ),
   );

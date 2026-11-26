@@ -5,6 +5,7 @@ import { ChevronDown, MoreVertical, Package, Pencil, Power, Trash2 } from "lucid
 import { Badge } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge.component";
 import { Card, CardHeader, CardTitle } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/card.component";
 import { ProductProps } from "@core/application/query/interface/product.entity";
+import { shouldOpenActionMenuUp } from "@/lib/action-menu-placement";
 
 export function ProductsTable({
   products,
@@ -104,7 +105,7 @@ export function ProductsTable({
                 <MoreVertical className="size-4" />
               </button>
               {openMenuId === product.id && (
-                <div className={`absolute right-0 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl ${itemIndex >= products.length - 2 ? "bottom-8" : "top-8"}`}>
+                <div className={`absolute right-0 z-[60] w-48 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl ${shouldOpenActionMenuUp(itemIndex, products.length) ? "bottom-8" : "top-8"}`}>
                   <button
                     type="button"
                     onClick={() => {

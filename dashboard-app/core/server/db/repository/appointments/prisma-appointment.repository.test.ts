@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { Appointment } from "@core/application/query/interface/appointment.entity";
 
 const prismaMock = {
   appointment: {
@@ -28,6 +29,8 @@ const rawAppointment = {
   userId: null,
   clientId: null,
   serviceId: null,
+  commissionPercent: null,
+  paymentMethod: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -80,5 +83,43 @@ describe("PrismaAppointmentRepository", () => {
     await repo.delete("a1");
 
     expect(prismaMock.appointment.delete).toHaveBeenCalledWith({ where: { id: "a1" } });
+  });
+
+  it("updates linked relations and persists completion payment data", async () => {
+    prismaMock.appointment.update.mockResolvedValue({
+      ...rawAppointment,
+      status: "Concluído",
+      statusId: "status-concluido",
+      userId: "staff-1",
+      clientId: "client-1",
+      serviceId: "service-1",
+      commissionPercent: 30,
+      paymentMethod: "Pix",
+    });
+    const repo = new PrismaAppointmentRepository();
+    const appointment = new Appointment({
+      ...rawAppointment,
+      status: "Concluído",
+      userId: "staff-1",
+      clientId: "client-1",
+      serviceId: "service-1",
+      commissionPercent: 30,
+      paymentMethod: "Pix",
+    });
+
+    const updated = await repo.update(appointment);
+
+    expect(updated.paymentMethod).toBe("Pix");
+    expect(prismaMock.appointment.update).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: "a1" },
+      data: expect.objectContaining({
+        paymentMethod: "Pix",
+        commissionPercent: 30,
+        user: { connect: { id: "staff-1" } },
+        client: { connect: { id: "client-1" } },
+        serviceRecord: { connect: { id: "service-1" } },
+        statusRecord: { connect: { id: "status-concluido" } },
+      }),
+    }));
   });
 });

@@ -21,7 +21,7 @@ describe("UpdateAppointmentStatus", () => {
     repo.update.mockImplementation(async (a) => a);
     const useCase = new UpdateAppointmentStatus(repo, userRepository);
 
-    const result = await useCase.execute({ id: "admin", role: "Administrador" }, "a1", "Concluído");
+    const result = await useCase.execute({ id: "admin", role: "Administrador" }, "a1", "Concluído", "Pix");
 
     expect(result.status).toBe("Concluído");
     expect(result.id).toBe("a1");
@@ -35,7 +35,7 @@ describe("UpdateAppointmentStatus", () => {
     userRepository.findById.mockResolvedValue({ commissionPercent: 10 });
     const useCase = new UpdateAppointmentStatus(repo, userRepository);
 
-    const result = await useCase.execute({ id: "admin", role: "Administrador" }, "a1", "Concluído");
+    const result = await useCase.execute({ id: "admin", role: "Administrador" }, "a1", "Concluído", "Pix");
 
     expect(result.commissionPercent).toBe(10);
   });
@@ -47,8 +47,31 @@ describe("UpdateAppointmentStatus", () => {
     userRepository.findById.mockResolvedValue({ commissionPercent: 12 });
     const useCase = new UpdateAppointmentStatus(repo, userRepository);
 
-    const result = await useCase.execute({ id: "admin", role: "Administrador" }, "a1", "Concluído");
+    const result = await useCase.execute({ id: "admin", role: "Administrador" }, "a1", "Concluído", "Pix");
 
     expect(result.commissionPercent).toBe(10);
+  });
+
+  it("requires and persists the payment method when completing", async () => {
+    const repo = mockAppointmentRepository();
+    repo.findById.mockResolvedValue(buildAppointment({ id: "a1", userId: "u1", status: "Confirmado" }));
+    repo.update.mockImplementation(async (appointment) => appointment);
+    const useCase = new UpdateAppointmentStatus(repo, userRepository);
+
+    await expect(useCase.execute({ id: "admin", role: "Administrador" }, "a1", "Concluído"))
+      .rejects.toThrow(/forma de pagamento/i);
+    await expect(useCase.execute({ id: "admin", role: "Administrador" }, "a1", "Concluído", "Pix"))
+      .resolves.toMatchObject({ status: "Concluído", paymentMethod: "Pix" });
+  });
+
+  it("rejects unsupported payment methods", async () => {
+    const repo = mockAppointmentRepository();
+    repo.findById.mockResolvedValue(buildAppointment({ id: "a1", userId: "u1", status: "Confirmado" }));
+    const useCase = new UpdateAppointmentStatus(repo, userRepository);
+
+    await expect(useCase.execute(
+      { id: "admin", role: "Administrador" }, "a1", "Concluído", "Cheque" as never,
+    )).rejects.toThrow(/forma de pagamento inválida/i);
+    expect(repo.update).not.toHaveBeenCalled();
   });
 });

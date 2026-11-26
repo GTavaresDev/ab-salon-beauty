@@ -8,9 +8,9 @@ import { ListPagination } from "@/app/(agendamentos)/(left-nav-bar)/_components/
 import { useAppointments } from "../../agenda/hooks/use-appointments";
 import { fetchUsersAction } from "@core/application/query/controller/users/user.controller";
 import type { UserProps } from "@core/application/query/interface/user.entity";
+import { buildCommissionCsv, buildCommissionRows } from "@/lib/commission-report";
 
 const money = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-const dateBR = (s: string) => new Date(`${s}T00:00:00`).toLocaleDateString("pt-BR");
 
 export function CommissionView() {
   const { appointmentList, isLoading } = useAppointments();
@@ -23,18 +23,13 @@ export function CommissionView() {
   // The filter reset is intentionally synchronous with the local controls.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setPage(1), [professional, from, to]);
-  const rows = useMemo(() => appointmentList.filter(a => a.status === "Concluído").map(a => {
-    const user = users.find(u => u.id === a.userId) || users.find(u => u.name === a.userName);
-    const percent = a.commissionPercent ?? 0;
-    const amount = Number(a.servicePrice) || 0;
-    return { ...a, percent, amount, commission: amount * percent / 100, professional: user?.name || a.userName || "Não informado" };
-  }).filter(a => (!professional || a.userId === professional) && (!from || a.date >= from) && (!to || a.date <= to))
-    .sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time)), [appointmentList, users, professional, from, to]);
+  const rows = useMemo(
+    () => buildCommissionRows(appointmentList, users, { professional, from, to }),
+    [appointmentList, users, professional, from, to],
+  );
   const visible = rows.slice((page - 1) * 10, page * 10);
   function exportCsv() {
-    const header = ["Data","Horário","Procedimento","Cliente","Profissional","Valor","Pagamento","Percentual","Comissão"];
-    const body = rows.map(r => [dateBR(r.date), r.time, r.service || "Não informado", r.name, r.professional, r.amount.toFixed(2).replace(".", ","), r.paymentMethod || "Não informado", `${r.percent}%`, r.commission.toFixed(2).replace(".", ",")]);
-    const csv = "\uFEFF" + [header, ...body].map(line => line.map(v => `"${String(v).replaceAll('"', '""')}"`).join(";")).join("\n");
+    const csv = buildCommissionCsv(rows);
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); const a = document.createElement("a"); a.href = url; a.download = `comissoes-${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
   }
   const card = "rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm";
@@ -65,7 +60,7 @@ export function CommissionView() {
         ) : (
           visible.map((row) => (
             <div key={row.id} className="grid gap-2 p-4 text-sm transition-colors hover:bg-zinc-50/80 lg:grid-cols-[.8fr_.7fr_1.4fr_1.2fr_1.2fr_.9fr_.8fr_.5fr_.9fr] lg:items-center lg:gap-4 lg:px-5 lg:py-3">
-              <span className="text-zinc-600">{dateBR(row.date)}</span>
+              <span className="text-zinc-600">{new Date(`${row.date}T00:00:00`).toLocaleDateString("pt-BR")}</span>
               <span className="text-zinc-600">{row.time}</span>
               <span className="font-medium text-zinc-900">{row.service || "Não informado"}</span>
               <span className="text-zinc-700">{row.name}</span>

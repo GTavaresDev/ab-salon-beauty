@@ -26,6 +26,5 @@ export const config = {
     "/servicos/:path*",
     "/vendas/:path*",
     "/relatorios/:path*",
-    "/configuracoes/:path*",
   ],
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import { canManageServices } from "@/lib/permissions";
 import { Services } from "@/app/(agendamentos)/(left-nav-bar)/servicos/_components/services.component";
 import { useServices } from "@/app/(agendamentos)/(left-nav-bar)/servicos/hooks/use-services";
 import { useAppShell } from "@/stores/app-shell.store";
@@ -31,6 +32,7 @@ export function ServicesView() {
       onAddService={handleAddService}
       onUpdateService={handleUpdateService}
       onDeleteService={handleDeleteService}
+      canManageServices={canManageServices(currentUser)}
       canViewMetrics={currentUser.role !== "Funcionario"}
     />
   );

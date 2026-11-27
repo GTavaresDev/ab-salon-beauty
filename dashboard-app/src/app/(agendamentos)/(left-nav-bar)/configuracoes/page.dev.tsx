@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { auth } from "@/auth";
+import { getCurrentSessionAction } from "@core/application/query/controller/users/auth.controller";
 import { redirect } from "next/navigation";
 import { SettingsView } from "./_components/settings-view.component";
 
@@ -9,11 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-  const session = await auth();
-  const isAdmin =
-    session?.user?.permissionLevel === 1 || session?.user?.role === "Administrador";
-
-  if (!isAdmin) {
+  const session = await getCurrentSessionAction();
+  if (!session) redirect("/login");
+  if (session.role !== "Administrador") {
     redirect("/dashboard");
   }
 

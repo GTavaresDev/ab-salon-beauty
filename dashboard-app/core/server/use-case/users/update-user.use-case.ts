@@ -15,6 +15,7 @@ export interface UpdateUserInput {
   lockedUntil?: Date | null;
   last?: string | null;
   commissionPercent?: number;
+  viewReports?: boolean;
 }
 
 export class UpdateUser {
@@ -50,6 +51,9 @@ export class UpdateUser {
       commissionPercent: input.commissionPercent ?? user.commissionPercent,
     });
 
-    return await this.userRepository.update(updated);
+    const changeRole = input.role !== undefined && input.role !== user.role;
+    const viewReports = updated.role === "Gestor" ? input.viewReports : undefined;
+    if (!changeRole && viewReports === undefined) return this.userRepository.update(updated);
+    return this.userRepository.update(updated, { changeRole, viewReports });
   }
 }

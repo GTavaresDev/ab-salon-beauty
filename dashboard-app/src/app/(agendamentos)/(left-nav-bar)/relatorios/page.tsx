@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { auth } from "@/auth";
+import { getCurrentSessionAction } from "@core/application/query/controller/users/auth.controller";
 import { redirect } from "next/navigation";
 import { canAccessReports } from "@/lib/permissions";
 import { ReportsDashboard } from "./_components/reports-dashboard.component";
@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default async function ReportsPage() {
-  const session = await auth();
-  const hasReportsPermission = canAccessReports(session?.user);
+  const session = await getCurrentSessionAction();
+  const hasReportsPermission = canAccessReports(session);
 
   if (!hasReportsPermission) {
     redirect("/dashboard");

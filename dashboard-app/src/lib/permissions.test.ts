@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canAccessOperationalCatalog,
+  canAccessReports,
   canViewDashboardMetrics,
   isEmployee,
 } from "./permissions";
@@ -24,4 +25,22 @@ describe("role permissions", () => {
       expect(canViewDashboardMetrics(user)).toBe(true);
     },
   );
+});
+
+describe("acesso a relatórios", () => {
+  const reportPermission = { name: "Gestor", enabled: true, viewReports: true };
+
+  it("libera Product Manegar e bloqueia Usuario mesmo com a coluna habilitada", () => {
+    expect(canAccessReports({ role: "Administrador" })).toBe(true);
+    expect(canAccessReports({ role: "Funcionario", permissions: [reportPermission] })).toBe(false);
+    expect(canAccessReports({ role: "Dono", permissions: [reportPermission] })).toBe(false);
+  });
+
+  it("exige a coluna habilitada na permissão ativa do Gestor", () => {
+    expect(canAccessReports({ role: "Gestor" })).toBe(false);
+    expect(canAccessReports({ role: "Gestor", permissions: [reportPermission] })).toBe(true);
+    expect(canAccessReports({ role: "Gestor", permissions: [{ ...reportPermission, enabled: false }] })).toBe(false);
+    expect(canAccessReports({ role: "Gestor", permissions: [{ ...reportPermission, viewReports: false }] })).toBe(false);
+    expect(canAccessReports({ role: "Gestor", permissions: [{ ...reportPermission, name: "Ver_Relatorios" }] })).toBe(false);
+  });
 });

@@ -59,11 +59,12 @@ export function DeleteSaleDialog({
         <form onSubmit={(e) => handleDelete(saleId, e)}>
           <CardContent className="space-y-4">
             <div>
-              <FieldLabel>Senha do Administrador</FieldLabel>
+              <FieldLabel>Senha da sua conta</FieldLabel>
               <Input
                 required
                 type="password"
                 name="password"
+                autoComplete="current-password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 placeholder="••••••"

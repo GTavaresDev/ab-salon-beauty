@@ -109,7 +109,7 @@ export function ShellLayout({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="mt-auto space-y-1 relative">
-            {currentUser.impersonating && (
+            {process.env.NODE_ENV === "development" && currentUser.impersonating && (
               <div className="mb-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-1.5 text-xs text-amber-900 flex items-center justify-between shadow-sm">
                 <span className="font-medium truncate">Modo de visualização</span>
                 <button

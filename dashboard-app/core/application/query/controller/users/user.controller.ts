@@ -100,6 +100,7 @@ export async function updateUserAction(input: {
   role?: StaffRole;
   status?: "Ativo" | "Inativo";
   commissionPercent?: number;
+  viewReports?: boolean;
 }): Promise<ActionResult<UserProps>> {
   try {
     const session = await requireSessionAction();
@@ -141,6 +142,12 @@ export async function updateUserAction(input: {
       } catch {
         return { success: false, error: "Operação não permitida" };
       }
+    }
+
+    const effectiveRole = parsedRole?.success ? parsedRole.data : targetUser.role;
+    if (input.viewReports !== undefined &&
+      (typeof input.viewReports !== "boolean" || session.role !== "Administrador" || effectiveRole !== "Gestor")) {
+      return { success: false, error: "Sem permissão para alterar o acesso a relatórios." };
     }
 
     let encryptedPassword: string | undefined;
@@ -194,6 +201,7 @@ export async function updateUserAction(input: {
       id: input.id, name: input.name, phone: input.phone, role: parsedRole?.success ? parsedRole.data : undefined, actorRole: session.role, status: input.status,
       email: input.email?.trim().toLowerCase(),
       password: encryptedPassword,
+      viewReports: input.viewReports,
       ...(input.status === "Ativo"
         ? { failedLoginAttempts: 0, lockedUntil: null }
         : {}),

@@ -1,0 +1,1 @@
+ALTER TABLE "UserPermissions" ADD COLUMN IF NOT EXISTS "Ver_Relatorios" BOOLEAN NOT NULL DEFAULT false;

@@ -23,7 +23,15 @@ export const useAppShellStore = create<AppShellState>((set, get) => ({
   setAllowPastBooking: (allowPastBooking) => set({ allowPastBooking }),
   setInitialEditUserId: (initialEditUserId) => set({ initialEditUserId }),
   setPageHeader: (pageHeader) => set({ pageHeader }),
-  bootstrap: async () => { const currentUser = await getCurrentSessionAction(); if (!currentUser) { window.location.assign("/login"); return; } set({ currentUser, isBootstrapping: false }); },
+  bootstrap: async () => {
+    const currentUser = await getCurrentSessionAction();
+    if (!currentUser) {
+      // The proxy can still see a JWT after the server rejects its account.
+      await get().handleLogout();
+      return;
+    }
+    set({ currentUser, isBootstrapping: false });
+  },
   handleStartImpersonation: async (id) => { const result = await startImpersonationAction(id); if (result.success) window.location.reload(); else get().showToast(result.error || "Erro ao assumir usuário."); },
   handleStopImpersonation: async () => { const result = await stopImpersonationAction(); if (result.success) window.location.reload(); else get().showToast(result.error || "Erro ao sair da conta."); },
   handleLogout: async () => { resetPendingNotificationDismissed(); await logoutAction(); },

@@ -17,12 +17,14 @@ export function SalesTable({
   onOpenAddModal,
   onEditSale,
   onDeleteSale,
+  canManageSales,
   canViewMetrics,
 }: {
   saleList: ExtendedSale[];
   onOpenAddModal: () => void;
   onEditSale: (id: string) => void;
   onDeleteSale: (id: string) => void;
+  canManageSales: boolean;
   canViewMetrics: boolean;
 }) {
   const {
@@ -120,7 +122,7 @@ export function SalesTable({
         </div>
         <div className={cn("divide-y divide-zinc-100", TABLE_BODY_MIN_HEIGHT_CLASS)}>
           {pagedSales.map((sale, itemIndex) => {
-            const actionMenuNode = (
+            const actionMenuNode = canManageSales && (
               <div className="relative">
                 <button
                   type="button"

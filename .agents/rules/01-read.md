@@ -32,7 +32,7 @@ Legenda:
 | Vendas                | Sim               | Sim         | Sim                                  |
 | Comissão              | Sim               | Sim         | Não                                  |
 | Usuários/Funcionários | Sim               | Sim         | Não                                  |
-| Relatórios            | Sim               | Sim         | Condicional                          |
+| Relatórios            | Sim               | Condicional | Não                                  |
 | Configurações         | Sim               | Não         | Não                                  |
 
 ## 2. Regras de exceção
@@ -69,12 +69,13 @@ O Usuario NÃO vê:
 - A rota `/comissao` está disponível para Product Manegar e Gestor.
 - Usuario é bloqueado nessa rota.
 
-### 2.6 Relatórios para Usuario
+### 2.6 Relatórios
 
-- Usuario só acessa relatórios quando também tiver uma permissão direta e ativa
-  de relatórios em `UserPermissions`.
-- Essa permissão não é um nível e não pode substituir `Usuario`, `Gestor` ou
-  `Product Manegar`.
+- Product Manegar tem acesso pelo nível.
+- Gestor tem acesso quando a coluna booleana `Ver_Relatorios` está habilitada
+  no seu registro ativo de nível `Gestor` em `UserPermissions`.
+- Usuario nunca tem acesso a relatórios.
+- Product Manegar pode conceder ou revogar esse acesso pela edição do Gestor.
 
 ## 3. Regras de implementação
 

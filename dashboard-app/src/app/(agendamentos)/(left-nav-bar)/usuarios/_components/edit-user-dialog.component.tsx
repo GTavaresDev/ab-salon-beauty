@@ -48,6 +48,8 @@ export function EditUserDialog({
     profileOptions,
   } = useEditUserDialog({ user, currentUserRole, canEditUser, canEditProfile, canEditPermissions, onUserUpdated, onClose, showToast });
 
+  const canEditReportAccess = currentUserRole === "Administrador" && canEditPermissions && user.role === "Gestor";
+
   return (
     <div
       className="fixed inset-0 lg:left-64 z-70 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
@@ -109,6 +111,9 @@ export function EditUserDialog({
                 role,
                 status,
                 commissionPercent,
+                viewReports: canEditReportAccess && (role ?? user.role) === "Gestor"
+                  ? form.has("viewReports")
+                  : undefined,
               });
 
               if (res.success && res.data) {
@@ -224,6 +229,18 @@ export function EditUserDialog({
                   ))}
                 </select>
               </div>
+            )}
+            {canEditReportAccess && (
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <input
+                  type="checkbox"
+                  name="viewReports"
+                  defaultChecked={user.permissions?.some(
+                    (permission) => permission.name === "Gestor" && permission.enabled && permission.viewReports,
+                  )}
+                />
+                Ver relatórios
+              </label>
             )}
             <div>
               <FieldLabel>Percentual de comissão (%)</FieldLabel>

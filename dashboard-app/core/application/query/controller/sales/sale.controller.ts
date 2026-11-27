@@ -4,6 +4,9 @@ import { createSaleGateway } from "@core/server/gateway/sale.gateway";
 import type { ActionResult } from "@core/application/query/interface/action.interface";
 import { SaleProps } from "@core/application/query/interface/sale.entity";
 import { requireSessionAction } from "@core/application/query/controller/users/auth.controller";
+import { PrismaUserRepository } from "@core/server/db/repository/users/prisma-user.repository";
+import { verifyPassword } from "@core/server/auth/password";
+import { canManageSales } from "@/lib/permissions";
 import { formatActionError } from "@/lib/action-error-handler";
 
 const saleFactory = createSaleGateway();
@@ -48,6 +51,19 @@ export async function createSaleAction(input: {
   }
 }
 
+const staffUsers = new PrismaUserRepository();
+
+async function confirmSaleManagement(password: string): Promise<void> {
+  const session = await requireSessionAction();
+  if (!canManageSales(session)) throw new Error("Sem permissão para alterar vendas.");
+
+  const user = await staffUsers.findById(session.id);
+  if (user?.status !== "Ativo" || user.role !== "Administrador" || !user.password ||
+    typeof password !== "string" || !await verifyPassword(password, user.password)) {
+    throw new Error("Senha da sua conta incorreta.");
+  }
+}
+
 export async function updateSaleAction(input: {
   id: string;
   quantity?: number;
@@ -56,12 +72,7 @@ export async function updateSaleAction(input: {
   password: string;
 }): Promise<ActionResult<SaleProps & { formattedTotal: string; formattedUnitPrice: string }>> {
   try {
-    await requireSessionAction();
-
-    const adminPassword = process.env.SALE_EDIT_PASSWORD;
-    if (!adminPassword || input.password !== adminPassword) {
-      return { success: false, error: "Senha de administrador incorreta." };
-    }
+    await confirmSaleManagement(input.password);
 
     const useCase = updateSale;
     const updated = await useCase.execute({
@@ -81,12 +92,7 @@ export async function deleteSaleAction(input: {
   password: string;
 }): Promise<ActionResult<void>> {
   try {
-    await requireSessionAction();
-
-    const adminPassword = process.env.SALE_EDIT_PASSWORD;
-    if (!adminPassword || input.password !== adminPassword) {
-      return { success: false, error: "Senha de administrador incorreta." };
-    }
+    await confirmSaleManagement(input.password);
 
     const useCase = deleteSale;
     await useCase.execute(input.id);

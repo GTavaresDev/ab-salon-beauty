@@ -1,7 +1,6 @@
 import { AUTH_SESSION_VERSION } from "@/lib/auth-session-version";
 import type { NextAuthConfig } from "next-auth";
 import type { StaffRole } from "@core/application/query/interface/user.entity";
-import { canAccessReports } from "@/lib/permissions";
 
 export const authConfig = {
   pages: {
@@ -40,19 +39,8 @@ export const authConfig = {
       const userObj = auth.user as
         | { role?: StaffRole; permissionLevel?: 0 | 1 | 2 | 3; permissions?: Array<{ name: string }> }
         | undefined;
-      const isAdmin =
-        userObj?.permissionLevel === 1 || userObj?.role === "Administrador";
       const isFuncionario =
         userObj?.permissionLevel === 3 || userObj?.role === "Funcionario";
-      const hasReportsPermission = canAccessReports(userObj);
-      if (pathname.startsWith("/relatorios") && !hasReportsPermission) {
-        return Response.redirect(new URL("/dashboard", request.nextUrl));
-      }
-
-      if (pathname.startsWith("/configuracoes") && !isAdmin) {
-        return Response.redirect(new URL("/dashboard", request.nextUrl));
-      }
-
       if (pathname.startsWith("/comissao") && isFuncionario) {
         return Response.redirect(new URL("/dashboard", request.nextUrl));
       }

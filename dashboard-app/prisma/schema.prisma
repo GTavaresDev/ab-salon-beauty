@@ -37,6 +37,7 @@ model UserPermission {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   description String?
   enabled     Boolean  @default(true)
+  viewReports        Boolean  @default(false) @map("Ver_Relatorios")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

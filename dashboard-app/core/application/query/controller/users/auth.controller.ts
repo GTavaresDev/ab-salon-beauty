@@ -36,7 +36,7 @@ export type SessionUser = {
   role: StaffRole;
   permissionLevel: 0 | 1 | 2 | 3;
   initials: string;
-  permissions?: Array<{ name: string }>;
+  permissions?: Array<{ name: string; enabled?: boolean; viewReports?: boolean }>;
   impersonating?: boolean;
   impersonator?: SessionActor;
 };
@@ -82,6 +82,8 @@ export async function getCurrentSessionAction(): Promise<SessionUser | null> {
     return null;
   }
 
+  if (session.user.impersonating && process.env.NODE_ENV !== "development") return null;
+
   const users = staffUsers;
   const current = await users.findById(session.user.id);
   if (!current || current.status !== "Ativo") return null;
@@ -112,6 +114,10 @@ export async function requireSessionAction(): Promise<SessionUser> {
 export async function startImpersonationAction(
   targetUserId: string,
 ): Promise<ActionResult<void>> {
+  if (process.env.NODE_ENV !== "development") {
+    return { success: false, error: "Recurso indisponível." };
+  }
+
   try {
     const session = await requireSessionAction();
     const actor = session.impersonator ?? session;
@@ -159,6 +165,10 @@ export async function stopImpersonationAction(): Promise<{
   success: boolean;
   error?: string;
 }> {
+  if (process.env.NODE_ENV !== "development") {
+    return { success: false, error: "Recurso indisponível." };
+  }
+
   try {
     const session = await requireSessionAction();
     if (!session.impersonating) {

@@ -38,6 +38,7 @@ model UserPermission {
   description        String?
   enabled            Boolean  @default(true)
   isSystemPermission Boolean  @default(false)
+  viewReports        Boolean  @default(false) @map("Ver_Relatorios")
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 

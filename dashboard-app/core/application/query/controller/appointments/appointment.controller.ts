@@ -49,7 +49,7 @@ export async function createAppointmentAction(input: {
       duration,
       userId: session.id,
       status: "Confirmado",
-    }, new Date(), session.role === "Administrador" && input.allowPastBooking === true));
+    }, new Date(), process.env.NODE_ENV === "development" && session.role === "Administrador" && input.allowPastBooking === true));
     return { success: true, data: created.toJSON() };
   } catch (error: unknown) {
     return { success: false, error: formatActionError(error, "Erro ao agendar.") };

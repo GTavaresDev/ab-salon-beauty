@@ -1,17 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buildUser } from "@core/server/use-case/users/test-helpers";
 
-const { createExecute, requireSession } = vi.hoisted(() => ({
+const { createExecute, requireSession, findById, updateExecute } = vi.hoisted(() => ({
   createExecute: vi.fn(),
   requireSession: vi.fn(),
+  findById: vi.fn(),
+  updateExecute: vi.fn(),
 }));
 
 vi.mock("@core/server/gateway/user.gateway", () => ({
   createUserGateway: () => ({
-    users: { findById: vi.fn() },
+    users: { findById },
     create: { execute: createExecute },
     list: { execute: vi.fn() },
-    update: { execute: vi.fn() },
+    update: { execute: updateExecute },
     delete: { execute: vi.fn() },
   }),
 }));
@@ -20,7 +22,7 @@ vi.mock("@core/application/query/controller/users/auth.controller", () => ({
 }));
 vi.mock("@core/server/auth/password", () => ({ hashPassword: vi.fn(async () => "hashed") }));
 
-import { createUserAction } from "./user.controller";
+import { createUserAction, updateUserAction } from "./user.controller";
 
 describe("createUserAction authorization", () => {
   beforeEach(() => {
@@ -75,5 +77,33 @@ describe("createUserAction authorization", () => {
     const result = await createUserAction(missingLevel);
     expect(result).toEqual({ success: false, error: "Operação não permitida" });
     expect(createExecute).not.toHaveBeenCalled();
+  });
+});
+
+describe("updateUserAction report access", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireSession.mockResolvedValue({ id: "admin", role: "Administrador", permissionLevel: 1 });
+    const manager = buildUser({ id: "target", role: "Gestor" });
+    findById.mockResolvedValue(manager);
+    updateExecute.mockResolvedValue(manager);
+  });
+
+  it.each([true, false])("permite que o Admin salve Ver_Relatorios como %s", async (viewReports) => {
+    const result = await updateUserAction({ id: "target", viewReports });
+    expect(result.success).toBe(true);
+    expect(updateExecute).toHaveBeenCalledWith(expect.objectContaining({ id: "target", viewReports }));
+  });
+
+  it("rejeita alteração solicitada por Gestor", async () => {
+    requireSession.mockResolvedValue({ id: "manager", role: "Gestor", permissionLevel: 2 });
+    expect((await updateUserAction({ id: "target", viewReports: true })).success).toBe(false);
+    expect(updateExecute).not.toHaveBeenCalled();
+  });
+
+  it("rejeita alteração em um Funcionário", async () => {
+    findById.mockResolvedValue(buildUser({ id: "target", role: "Funcionario" }));
+    expect((await updateUserAction({ id: "target", viewReports: true })).success).toBe(false);
+    expect(updateExecute).not.toHaveBeenCalled();
   });
 });

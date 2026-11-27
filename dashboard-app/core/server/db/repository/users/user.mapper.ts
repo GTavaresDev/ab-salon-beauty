@@ -43,6 +43,7 @@ export class UserMapper {
               userId: p.userId,
               description: p.description,
               enabled: p.enabled,
+              viewReports: p.viewReports,
               createdAt: p.createdAt,
               updatedAt: p.updatedAt,
             }))

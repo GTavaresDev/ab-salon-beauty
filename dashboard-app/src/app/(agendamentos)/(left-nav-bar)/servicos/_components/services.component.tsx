@@ -23,8 +23,9 @@ export function Services({
   onAddService,
   onUpdateService,
   onDeleteService,
+  canManageServices,
   canViewMetrics,
-}: ServicesProps) {
+}: ServicesProps & { canManageServices: boolean }) {
   const {
     search,
     setSearch,
@@ -102,18 +103,18 @@ export function Services({
             className="pl-9 w-full"
           />
         </div>
-        <Button onClick={() => handleOpenModal()} className="w-full sm:w-48 shrink-0 gap-2 justify-center">
+        {canManageServices && <Button onClick={() => handleOpenModal()} className="w-full sm:w-48 shrink-0 gap-2 justify-center">
           <Plus className="size-4" /> Novo Serviço
-        </Button>
+        </Button>}
       </div>
 
       {filtered.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
             <p className="text-zinc-500 mb-4">Nenhum serviço encontrado</p>
-            <Button variant="outline" onClick={() => handleOpenModal()}>
+            {canManageServices && <Button variant="outline" onClick={() => handleOpenModal()}>
               Criar Primeiro Serviço
-            </Button>
+            </Button>}
           </CardContent>
         </Card>
       ) : (
@@ -155,7 +156,7 @@ export function Services({
             </div>
             <div className={cn("divide-y divide-zinc-100", TABLE_BODY_MIN_HEIGHT_CLASS)}>
               {paginatedItems.filter(s => !!s.id).map((service, itemIndex, items) => {
-                const actionMenuNode = (
+                const actionMenuNode = canManageServices && (
                   <div className="relative">
                     <button
                       type="button"
@@ -301,7 +302,7 @@ export function Services({
       )}
 
       <ServiceModal
-        open={modal}
+        open={canManageServices && modal}
         onOpenChange={setModal}
         onSave={handleSave}
         initialData={editingService}

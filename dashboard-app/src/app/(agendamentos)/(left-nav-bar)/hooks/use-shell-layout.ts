@@ -107,13 +107,13 @@ export function useShellLayout({ children }: { children: ReactNode }) {
       icon: CircleDollarSign,
       href: "/comissao",
     },
-    {
+    ...(process.env.NODE_ENV === "development" ? [{
       id: "configuracoes",
       label: "Configurações",
       icon: Settings,
       href: "/configuracoes",
       adminOnly: true,
-    },
+    }] : []),
   ];
 
   const hasReportsPermission = canAccessReports(currentUser);
@@ -169,7 +169,7 @@ export function useShellLayout({ children }: { children: ReactNode }) {
     if (pathname.includes("/comissao")) {
       return { title: "Comissão", subtitle: "Audite os atendimentos concluídos e acompanhe as comissões da equipe." };
     }
-    if (pathname.includes("/configuracoes")) {
+    if (process.env.NODE_ENV === "development" && pathname.includes("/configuracoes")) {
       return { title: "Configurações", subtitle: "Gerencie preferências e recursos do sistema." };
     }
     return {

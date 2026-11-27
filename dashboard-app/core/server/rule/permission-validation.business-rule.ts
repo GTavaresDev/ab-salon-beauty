@@ -46,13 +46,6 @@ export function canSharePermissions(context: PermissionCheckContext): boolean {
 }
 
 /**
- * Checks if a user can access reports
- */
-export function canAccessReports(context: PermissionCheckContext): boolean {
-  return context.role === 'Administrador' || context.role === 'Gestor';
-}
-
-/**
  * Validates that a user can grant a specific permission to another user
  */
 export function validatePermissionGrant(

@@ -161,11 +161,12 @@ export function EditSaleDialog({
 
               {/* Admin Password - Unique to Edit Modal */}
               <div>
-                <FieldLabel>Senha do Administrador</FieldLabel>
+                <FieldLabel>Senha da sua conta</FieldLabel>
                 <Input
                   required
                   type="password"
                   name="password"
+                  autoComplete="current-password"
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
                   placeholder="••••••"

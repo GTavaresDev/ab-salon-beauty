@@ -18,6 +18,7 @@ export function Sales({
   onAddSale,
   onUpdateSale,
   onDeleteSale,
+  canManageSales,
   canViewMetrics,
 }: {
   showToast: (message: string) => void;
@@ -35,6 +36,7 @@ export function Sales({
     paymentMethod?: PaymentMethod;
   }, password: string) => Promise<void>;
   onDeleteSale: (id: string, password: string) => Promise<void>;
+  canManageSales: boolean;
   canViewMetrics: boolean;
 }) {
   const {
@@ -53,6 +55,7 @@ export function Sales({
         onOpenAddModal={() => setModal(true)}
         onEditSale={setEditModal}
         onDeleteSale={setDeleteModal}
+        canManageSales={canManageSales}
         canViewMetrics={canViewMetrics}
       />
 
@@ -65,7 +68,7 @@ export function Sales({
       />
 
       <EditSaleDialog
-        saleId={editModal}
+        saleId={canManageSales ? editModal : null}
         onClose={() => setEditModal(null)}
         saleList={saleList}
         productList={productList}
@@ -74,7 +77,7 @@ export function Sales({
       />
 
       <DeleteSaleDialog
-        saleId={deleteModal}
+        saleId={canManageSales ? deleteModal : null}
         onClose={() => setDeleteModal(null)}
         showToast={showToast}
         onDeleteSale={onDeleteSale}

@@ -89,8 +89,9 @@ export class PrismaUserRepository implements UserRepository {
     return UserMapper.toDomain(created);
   }
 
-  async update(user: User): Promise<User> {
+  async update(user: User, access?: { changeRole: boolean; viewReports?: boolean }): Promise<User> {
     const raw = UserMapper.toPersistence(user);
+    const name = permissionNameFromRole(raw.role);
     const updated = await this.db.user.update({
       where: { id: raw.id },
       data: {
@@ -104,10 +105,18 @@ export class PrismaUserRepository implements UserRepository {
         failedLoginAttempts: raw.failedLoginAttempts,
         lockedUntil: raw.lockedUntil,
         commissionPercent: raw.commissionPercent,
-        permissions: {
-          deleteMany: { name: { in: rolePermissionNames } },
-          create: [{ name: permissionNameFromRole(raw.role) }],
-        },
+        permissions: access?.changeRole
+          ? {
+              deleteMany: { name: { in: rolePermissionNames, not: name } },
+              upsert: {
+                where: { userId_name: { userId: raw.id, name } },
+                create: { name, viewReports: access.viewReports ?? false },
+                update: { enabled: true, viewReports: access.viewReports },
+              },
+            }
+          : access?.viewReports !== undefined
+            ? { updateMany: { where: { name: "Gestor", enabled: true }, data: { viewReports: access.viewReports } } }
+            : undefined,
       },
       include: { permissions: { where: { enabled: true } } },
     });

@@ -27,6 +27,7 @@ CREATE TABLE "UserPermissions" (
     "userId" TEXT NOT NULL,
     "description" TEXT,
     "enabled" BOOLEAN NOT NULL DEFAULT true,
+    "Ver_Relatorios" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

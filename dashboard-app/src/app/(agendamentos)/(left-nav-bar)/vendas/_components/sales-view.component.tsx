@@ -1,5 +1,6 @@
 "use client";
 
+import { canManageSales } from "@/lib/permissions";
 import { useAppShell } from "@/stores/app-shell.store";
 import { useSales } from "@/app/(agendamentos)/(left-nav-bar)/vendas/hooks/use-sales";
 import { useProducts } from "@/app/(agendamentos)/(left-nav-bar)/produtos/hooks/use-products";
@@ -39,6 +40,7 @@ export function SalesView() {
       onAddSale={handleAddSale}
       onUpdateSale={handleUpdateSale}
       onDeleteSale={handleDeleteSale}
+      canManageSales={canManageSales(currentUser)}
       canViewMetrics={currentUser.role !== "Funcionario"}
     />
   );

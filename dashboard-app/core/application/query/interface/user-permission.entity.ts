@@ -4,6 +4,7 @@ export interface UserPermissionProps {
   userId: string;
   description?: string | null;
   enabled: boolean;
+  viewReports?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

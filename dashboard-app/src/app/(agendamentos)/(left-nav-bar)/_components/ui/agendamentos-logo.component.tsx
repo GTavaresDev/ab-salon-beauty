@@ -1,10 +1,10 @@
 "use client";
 
-import { CalendarDays } from "lucide-react";
+import Image from "next/image";
 
 interface LogoProps {
   className?: string;
-  variant?: "dark" | "light";
+  variant?: "dark" | "light" | "rose";
   size?: "sm" | "md" | "lg";
 }
 
@@ -14,49 +14,61 @@ export function AgendamentosLogo({
   size = "md",
 }: LogoProps) {
   const isDark = variant === "dark";
+  const isRose = variant === "rose";
 
-  const iconContainerSize =
-    size === "sm" ? "size-7" : size === "lg" ? "size-10" : "size-8";
-  const iconSize =
-    size === "sm" ? "size-4" : size === "lg" ? "size-5" : "size-4.5";
+  const logoHeight = size === "sm" ? 28 : size === "lg" && isRose ? 128 : size === "lg" ? 40 : 32;
+  const logoWidth = Math.round((logoHeight * 1138) / 353);
   const titleSize =
     size === "sm"
       ? "text-base font-bold"
+      : size === "lg" && isRose
+        ? "text-[22px] font-bold"
       : size === "lg"
-      ? "text-2xl font-bold"
-      : "text-lg font-bold";
+        ? "text-2xl font-bold"
+        : "text-lg font-bold";
   const badgeSize =
-    size === "sm"
+    isRose
+      ? "text-lg"
+      : size === "sm"
       ? "text-[9px]"
       : size === "lg"
-      ? "text-[10px]"
-      : "text-[9.5px]";
+        ? "text-[10px]"
+        : "text-[9.5px]";
 
   return (
-    <div className={`flex items-center gap-2.5 select-none ${className}`}>
-      {/* Icon Emblem */}
-      <div
-        className={`relative flex ${iconContainerSize} shrink-0 items-center justify-center rounded-xl shadow-sm transition-transform ${
-          isDark
-            ? "bg-gradient-to-br from-zinc-800 to-zinc-950 text-white ring-1 ring-white/20"
-            : "bg-gradient-to-br from-zinc-900 to-zinc-950 text-white ring-1 ring-zinc-800"
-        }`}
-      >
-        <CalendarDays className={`${iconSize} stroke-[2.2] text-white`} />
-      </div>
+    <div
+      className={`flex select-none ${
+        isRose ? "flex-col items-center gap-4" : "items-center gap-2.5"
+      } ${className}`}
+    >
+      <Image
+        src="/images/brand/logo-horizontal.png"
+        alt="AB Salon Beauty"
+        width={logoWidth}
+        height={logoHeight}
+        className={`${isRose ? "h-32" : "h-auto"} w-auto shrink-0 object-contain`}
+      />
 
       {/* Brand Typography */}
       <div className="flex flex-col">
+        {!isRose ? (
+          <span
+            className={`leading-none tracking-tight ${titleSize} ${
+              isDark ? "text-white" : "text-zinc-950"
+            }`}
+          >
+            AB Salon Beauty
+          </span>
+        ) : null}
         <span
-          className={`leading-none tracking-tight ${titleSize} ${
-            isDark ? "text-white" : "text-zinc-950"
-          }`}
-        >
-          Agendamentos
-        </span>
-        <span
-          className={`mt-1 font-semibold leading-none uppercase tracking-[0.14em] ${badgeSize} ${
-            isDark ? "text-zinc-400" : "text-zinc-500"
+          className={`${isRose ? "font-medium" : "mt-1 font-semibold"} leading-none uppercase ${
+            isRose ? "tracking-[0.25em]" : "tracking-[0.14em]"
+          } ${badgeSize} ${
+            isRose
+              ? "text-[#9B4A68]"
+              : isDark
+                ? "text-zinc-400"
+                : "text-zinc-500"
           }`}
         >
           Gestão & Agenda

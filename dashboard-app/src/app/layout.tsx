@@ -30,16 +30,17 @@ export const metadata: Metadata = {
     type: "website",
   },
   icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/icon.png", type: "image/png", sizes: "512x512" },
-      { url: "/agendamentos_icon.png", type: "image/png", sizes: "192x192" },
-    ],
-    shortcut: "/favicon.ico",
-    apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
-    ],
+    icon: {
+      url: "/images/brand/logo-circulo.png",
+      type: "image/png",
+      sizes: "1254x1254",
+    },
+    shortcut: "/images/brand/logo-circulo.png",
+    apple: {
+      url: "/images/brand/logo-circulo.png",
+      type: "image/png",
+      sizes: "1254x1254",
+    },
   },
   twitter: {
     card: "summary_large_image",

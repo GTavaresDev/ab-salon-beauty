@@ -5,6 +5,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { createPrivateKey, createSign, generateKeyPairSync, randomUUID } from 'node:crypto';
 import { AppModule } from '../src/app.module.js';
+import { bookingDays } from '../src/cliente/appointments/use-cases/booking-availability.js';
 
 type TestClient = { id: string; email: string };
 
@@ -129,14 +130,48 @@ describe('Segurança e2e de agendamentos', () => {
     expect(row).toHaveLength(1);
   });
 
-  it('ignora clientId de outro cliente no POST e usa o cliente do token', async () => {
-    const response = await request(app.getHttpServer()).post('/appointments').set(auth(clientA)).send({
-      date: '2099-01-03', time: '12:00', name: 'Criado E2E', service: 'Consulta', duration: '30', clientId: clientB.id,
-    }).expect(201);
-    const createdId = response.body.id;
-    const row = await dataSource.query('SELECT "clientId" FROM "Appointments" WHERE id = $1', [createdId]);
-    expect(row[0].clientId).toBe(clientA.id);
-    await dataSource.query('DELETE FROM "Appointments" WHERE id = $1', [createdId]);
+  it('serializa confirmações concorrentes e usa o cliente do token', async () => {
+    const serviceId = randomUUID();
+    const userId = randomUUID();
+    try {
+      await dataSource.query(
+        `INSERT INTO "Services" (id, name, duration, status, "createdAt", "updatedAt")
+         VALUES ($1, 'Consulta E2E', 60, 'Ativo', NOW(), NOW())`,
+        [serviceId],
+      );
+      await dataSource.query(
+        `INSERT INTO "Users" (id, name, email, phone, initials, status, "serviceIds", "createdAt", "updatedAt")
+         VALUES ($1, 'Profissional E2E', $2, '000000000', 'PE', 'Ativo', ARRAY[$3]::text[], NOW(), NOW())`,
+        [userId, `${userId}@example.test`, serviceId],
+      );
+
+      const catalog = await request(app.getHttpServer()).get('/appointments/booking-flow')
+        .set(auth(clientA)).expect(200);
+      const firstDay = bookingDays(new Date())[1];
+      const slot = Object.entries(catalog.body.availability[2] as Record<string, string[]>)
+        .find(([date, times]) => date >= firstDay && times.length > 0);
+      if (!slot) throw new Error('A base de testes precisa ter um horário livre de 60 minutos.');
+      const [date, [time]] = slot;
+      const payload = { date, time, serviceId, userId, name: 'Nome enviado', duration: '30 min' };
+      const [a, b] = await Promise.all([
+        request(app.getHttpServer()).post('/appointments').set(auth(clientA)).send({ ...payload, clientId: clientB.id }),
+        request(app.getHttpServer()).post('/appointments').set(auth(clientB)).send({ ...payload, clientId: clientA.id }),
+      ]);
+      expect([a.status, b.status].sort()).toEqual([201, 409]);
+      const rows = await dataSource.query(
+        'SELECT "clientId", name, duration FROM "Appointments" WHERE "serviceId" = $1',
+        [serviceId],
+      );
+      expect(rows).toEqual([{
+        clientId: a.status === 201 ? clientA.id : clientB.id,
+        name: a.status === 201 ? 'Cliente E2E A' : 'Cliente E2E B',
+        duration: '60 min (1h)',
+      }]);
+    } finally {
+      await dataSource.query('DELETE FROM "Appointments" WHERE "serviceId" = $1', [serviceId]);
+      await dataSource.query('DELETE FROM "Users" WHERE id = $1', [userId]);
+      await dataSource.query('DELETE FROM "Services" WHERE id = $1', [serviceId]);
+    }
   });
 
   it('retorna 404 para IDs inexistentes sem revelar existência', async () => {

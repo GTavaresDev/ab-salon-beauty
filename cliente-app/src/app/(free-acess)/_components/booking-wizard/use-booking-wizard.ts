@@ -1,68 +1,45 @@
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import type {
-  BookableServiceDTO,
-} from "@core/application/query/contract/service.contract";
+import type { BookingFlow, BookingService } from "@core/application/query/contract/booking-flow.contract";
 import type { BookableProfessionalDTO } from "@core/application/query/contract/professional.contract";
 import type { ClientAppointmentDTO } from "@core/application/interfaces/appointments/client-appointment";
-import {
-  createClientAppointmentAction,
-} from "@core/application/query/controller/create-appointment.controller";
-import { getAvailableDatesAction, getAvailableTimesAction } from "@core/application/query/controller/get-date.controller";
-import { getProfessionalsController } from "@core/application/query/controller/get-professionals.controller";
-import { STEP_ORDER, Step } from "./booking-wizard.types";
+import { confirmBooking, loadBookingFlow } from "@core/application/query/controller/booking-flow.controller";
+import { STEP_ORDER, type Step } from "./booking-wizard.types";
 
-export function useBookingWizard() {
-  const router = useRouter();
+export function useBookingWizard(initialFlow: BookingFlow) {
+  const [flow, setFlow] = useState(initialFlow);
   const [step, setStep] = useState<Step>("servico");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const [service, setService] = useState<BookableServiceDTO | null>(null);
+  const [service, setService] = useState<BookingService | null>(null);
   const [professional, setProfessional] = useState<BookableProfessionalDTO | null>(null);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-
-  const [professionals, setProfessionals] = useState<BookableProfessionalDTO[]>([]);
-  const [dates, setDates] = useState<string[]>([]);
-  const [times, setTimes] = useState<string[]>([]);
   const [booked, setBooked] = useState<ClientAppointmentDTO | null>(null);
 
-  async function selectService(selected: BookableServiceDTO) {
+  const byDate = service ? flow.availability[Math.ceil(service.durationMinutes / 30)] : undefined;
+  const dates = byDate ? Object.keys(byDate) : [];
+  const times = byDate?.[date] ?? [];
+
+  function selectService(selected: BookingService) {
     setService(selected);
     setProfessional(null);
     setDate("");
     setTime("");
     setError("");
-    setLoading(true);
     setStep("profissional");
-
-    const list = await getProfessionalsController(selected.id);
-    setProfessionals(list);
-    setLoading(false);
   }
 
-  async function selectProfessional(selected: BookableProfessionalDTO) {
+  function selectProfessional(selected: BookableProfessionalDTO) {
     setProfessional(selected);
     setDate("");
     setTime("");
-    setLoading(true);
     setStep("data");
-
-    const available = await getAvailableDatesAction(service!.id);
-    setDates(available);
-    setLoading(false);
   }
 
-  async function selectDate(selected: string) {
+  function selectDate(selected: string) {
     setDate(selected);
     setTime("");
-    setLoading(true);
     setStep("horario");
-
-    const available = await getAvailableTimesAction(service!.id, selected);
-    setTimes(available);
-    setLoading(false);
   }
 
   function selectTime(selected: string) {
@@ -71,55 +48,56 @@ export function useBookingWizard() {
   }
 
   async function confirm() {
-    if (!service || !professional || !date || !time) return;
-
+    if (loading || !professional || !date || !time) return;
     setLoading(true);
     setError("");
 
-    const result = await createClientAppointmentAction({
-      serviceId: service.id,
-      professionalId: professional.id,
-      date,
-      time,
-    });
+    try {
+      const result = await confirmBooking({ selection: professional.id, date, time });
+      if (result.success) {
+        setBooked(result.data);
+        setStep("sucesso");
+        return;
+      }
 
-    setLoading(false);
-
-    if (!result.success || !result.data) {
-      setError(result.error || "Não foi possível agendar.");
-      // O horário pode ter sido ocupado durante o fluxo: volta para a escolha.
-      const refreshed = await getAvailableTimesAction(service.id, date);
-      setTimes(refreshed);
-      setTime("");
-      setStep("horario");
-      return;
+      setError(result.error);
+      if (result.refresh) {
+        const refreshed = await loadBookingFlow();
+        if (refreshed.success) {
+          setFlow(refreshed.data);
+          setService(null);
+          setProfessional(null);
+          setDate("");
+          setTime("");
+          setStep("servico");
+        } else {
+          setError(refreshed.error);
+        }
+      }
+    } catch {
+      setError("Não foi possível concluir a solicitação. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
-
-    setBooked(result.data);
-    setStep("sucesso");
-    router.refresh();
   }
 
   function goBack() {
     setError("");
     const index = STEP_ORDER.indexOf(step);
-    if (index > 0) {
-      setStep(STEP_ORDER[index - 1]);
-    }
+    if (!loading && index > 0) setStep(STEP_ORDER[index - 1]);
   }
 
-  const stepIndex = STEP_ORDER.indexOf(step);
-
   return {
+    services: flow.services,
     step,
-    stepIndex,
+    stepIndex: STEP_ORDER.indexOf(step),
     loading,
     error,
     service,
     professional,
     date,
     time,
-    professionals,
+    professionals: service?.professionals ?? [],
     dates,
     times,
     booked,

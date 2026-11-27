@@ -17,8 +17,9 @@ import {
 } from "../portal-format/portal-format";
 import { STEP_ORDER, type BookingWizardProps } from "./booking-wizard.types";
 
-export function BookingWizard({ services }: BookingWizardProps) {
+export function BookingWizard({ flow }: BookingWizardProps) {
   const {
+    services,
     step,
     stepIndex,
     loading,
@@ -39,7 +40,7 @@ export function BookingWizard({ services }: BookingWizardProps) {
     goBack,
     title,
     subtitle,
-  } = useBookingWizardView({ services });
+  } = useBookingWizardView({ flow });
 
   if (step === "sucesso" && booked) {
     return <BookingSuccess appointment={booked} />;

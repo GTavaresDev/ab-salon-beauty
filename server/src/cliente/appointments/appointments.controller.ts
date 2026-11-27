@@ -39,8 +39,11 @@ export class AppointmentsController {
   async create(@Body() input: CreateAppointmentDto, @CurrentClientAgendaActor() actor: ClientAgendaActor) {
     if (actor.issuer === 'client') {
       const booking = clientBooking(input, actor.sub);
-      await this.assertProfessionalForService(booking.serviceId, booking.userId);
-      return this.createAppointment.create({ ...booking, professionalName: undefined, professionalEmail: undefined });
+      if (typeof booking.serviceId !== 'string' || !booking.serviceId.trim()
+        || typeof booking.userId !== 'string' || !booking.userId.trim()) {
+        throw new BadRequestException('Serviço e profissional são obrigatórios.');
+      }
+      return this.createAppointment.book(booking, actor.sub);
     }
     return this.createAppointment.create({
       ...input,
@@ -78,6 +81,12 @@ export class AppointmentsController {
       if ((error as { code?: string })?.code === '23505') throw new ConflictException('Este atendimento já foi avaliado.');
       throw error;
     }
+  }
+
+  @Get('booking-flow')
+  bookingFlow(@CurrentClientAgendaActor() actor: ClientAgendaActor) {
+    if (actor.issuer !== 'client') throw new ForbiddenException('Acesso não permitido.');
+    return this.getDates.prefetch();
   }
 
   @Get('services')

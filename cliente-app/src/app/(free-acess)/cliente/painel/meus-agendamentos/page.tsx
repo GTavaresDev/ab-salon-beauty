@@ -39,7 +39,7 @@ export default async function MyAppointmentsPage() {
       <div className="w-full">
         <div className="flex items-center justify-end">
           <Button size="sm" asChild>
-            <Link href="/cliente/painel/agendar">
+            <Link href="/cliente/painel/agendar" prefetch={false}>
               <CalendarPlus className="size-4 mr-1.5" /> Novo agendamento
             </Link>
           </Button>

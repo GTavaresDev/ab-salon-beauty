@@ -3,8 +3,9 @@
 import { STEP_TITLE, type BookingWizardProps } from "../booking-wizard/booking-wizard.types";
 import { useBookingWizard } from "../booking-wizard/use-booking-wizard";
 
-export function useBookingWizardView({ services }: BookingWizardProps) {
+export function useBookingWizardView({ flow }: BookingWizardProps) {
   const {
+    services,
     step,
     stepIndex,
     loading,
@@ -23,10 +24,11 @@ export function useBookingWizardView({ services }: BookingWizardProps) {
     selectTime,
     confirm,
     goBack,
-  } = useBookingWizard();
+  } = useBookingWizard(flow);
 
   const { title, subtitle } = STEP_TITLE[step];
   return {
+    services,
     step,
     stepIndex,
     loading,

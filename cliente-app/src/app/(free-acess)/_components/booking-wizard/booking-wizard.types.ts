@@ -1,4 +1,4 @@
-import type { BookableServiceDTO } from "@core/application/query/contract/service.contract";
+import type { BookingFlow } from "@core/application/query/contract/booking-flow.contract";
 
 export type Step = "servico" | "profissional" | "data" | "horario" | "confirmacao" | "sucesso";
 
@@ -14,9 +14,5 @@ export const STEP_TITLE: Record<Step, { title: string; subtitle: string }> = {
 };
 
 export interface BookingWizardProps {
-  services: BookableServiceDTO[];
-}
-
-export interface UseBookingWizardProps {
-  services: BookableServiceDTO[];
+  flow: BookingFlow;
 }

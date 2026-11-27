@@ -10,40 +10,38 @@ const booking = {
 
 function setup() {
   const create = vi.fn().mockResolvedValue({ id: 'appointment-1' });
+  const book = vi.fn().mockResolvedValue({ id: 'appointment-1' });
   const update = vi.fn().mockResolvedValue({ id: 'appointment-1' });
   const execute = vi.fn().mockResolvedValue([{ id: 'professional-1', name: 'Profissional', initials: 'PR' }]);
   const assertOwner = vi.fn().mockResolvedValue(undefined);
   const controller = new AppointmentsController(
     {} as never, {} as never, {} as never,
-    { create } as never, { update } as never, {} as never,
+    { create, book } as never, { update } as never, {} as never,
     { execute } as never, {} as never, { assertOwner } as never,
     {} as never, {} as never,
   );
-  return { controller, create, update, execute, assertOwner };
+  return { controller, create, book, update, execute, assertOwner };
 }
 
 describe('agendamento de cliente por serviço e profissional', () => {
-  it('cria com o ID validado e ignora nome e e-mail enviados pelo cliente', async () => {
-    const { controller, create, execute } = setup();
+  it('delega a reserva do cliente autenticado à validação transacional', async () => {
+    const { controller, book, execute } = setup();
 
-    await controller.create(booking, actor);
+    await controller.create({ ...booking, clientId: 'outro-cliente' }, actor);
 
-    expect(execute).toHaveBeenCalledWith('service-1');
-    expect(create).toHaveBeenCalledWith(expect.objectContaining({
+    expect(execute).not.toHaveBeenCalled();
+    expect(book).toHaveBeenCalledWith(expect.objectContaining({
       serviceId: 'service-1', userId: 'professional-1', clientId: 'client-1',
-      professionalName: undefined, professionalEmail: undefined,
-    }));
+      statusName: 'Pendente', channelId: 'site',
+    }), actor.sub);
   });
 
-  it('recusa IDs ausentes ou vínculo removido antes da confirmação', async () => {
-    const { controller, create, execute } = setup();
+  it('recusa IDs ausentes antes da validação transacional', async () => {
+    const { controller, book } = setup();
 
     await expect(controller.create({ ...booking, userId: undefined }, actor)).rejects.toThrow(BadRequestException);
     await expect(controller.create({ ...booking, serviceId: undefined }, actor)).rejects.toThrow(BadRequestException);
-    expect(execute).not.toHaveBeenCalled();
-    execute.mockResolvedValueOnce([]);
-    await expect(controller.create(booking, actor)).rejects.toThrow('Profissional não realiza este serviço.');
-    expect(create).not.toHaveBeenCalled();
+    expect(book).not.toHaveBeenCalled();
   });
 
   it('reagenda apenas com vínculo válido e ignora nome e e-mail enviados', async () => {

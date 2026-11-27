@@ -44,7 +44,7 @@ export default async function ClientHomePage() {
     >
       <section className="grid gap-3 sm:grid-cols-2">
         <Button size="lg" className="h-12 text-base font-medium gap-2" asChild>
-          <Link href="/cliente/painel/agendar">
+          <Link href="/cliente/painel/agendar" prefetch={false}>
             <CalendarPlus className="size-5" /> Novo agendamento
           </Link>
         </Button>
@@ -109,7 +109,7 @@ export default async function ClientHomePage() {
               Escolha um serviço e reserve o melhor horário para você.
             </p>
             <Button className="mt-4" asChild>
-              <Link href="/cliente/painel/agendar">
+              <Link href="/cliente/painel/agendar" prefetch={false}>
                 <CalendarPlus /> Agendar agora
               </Link>
             </Button>

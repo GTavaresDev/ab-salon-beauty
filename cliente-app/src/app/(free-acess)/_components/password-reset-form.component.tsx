@@ -43,7 +43,13 @@ export function PasswordResetForm() {
           E-mail
           <Input className="mt-2" name="email" type="email" autoComplete="email" required />
         </label>
-        <Button className="w-full" size="lg" type="submit">Gerar mensagem</Button>
+        <Button
+          className="w-full bg-[#F8C5CE] font-semibold text-[#3D0F22] hover:bg-[#F4B6C6] focus-visible:ring-[#7A3350] focus-visible:ring-offset-2"
+          size="lg"
+          type="submit"
+        >
+          Gerar mensagem
+        </Button>
       </form>
 
       <dialog ref={dialog} aria-labelledby="whatsapp-heading"

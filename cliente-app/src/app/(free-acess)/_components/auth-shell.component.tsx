@@ -1,5 +1,5 @@
+import Image from "next/image";
 import { type ReactNode } from "react";
-import { AgendamentosLogo } from "@/components/portal-ui/agendamentos-logo.component";
 
 /** Casca das telas públicas do portal (login, cadastro, recuperação). */
 export function AuthShell({
@@ -14,32 +14,38 @@ export function AuthShell({
   footer?: ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-4 py-8 sm:px-6 sm:py-12">
-      <div className="w-full max-w-110">
-        {/* Logo Centralizado */}
-        <div className="flex justify-center">
-          <AgendamentosLogo variant="light" size="md" />
+    <main className="flex min-h-screen items-center justify-center bg-[#FAFAFA] px-6 py-10 sm:px-10">
+      <div className="w-full max-w-[430px]">
+        <div className="mb-7 flex flex-col items-center gap-2">
+          <Image
+            src="/images/brand/logo-horizontal-transparente.png"
+            alt="AB Salon Beauty"
+            width={935}
+            height={240}
+            className="h-14 w-auto max-w-full object-contain"
+            preload
+          />
+          <p className="text-center text-[11px] font-medium tracking-[0.25em] text-[#9B4A68]">
+            GESTÃO &amp; AGENDA
+          </p>
         </div>
 
-        {/* Card do Formulário Centralizado */}
-        <div className="mt-6 sm:mt-8 rounded-2xl border border-zinc-200/80 bg-white p-5 sm:p-8 shadow-sm">
-          <div className="text-center">
-            <h1 className="text-xl font-semibold tracking-[-0.03em] text-zinc-950 sm:text-3xl">
-              {title}
-            </h1>
-            <p className="mt-2 text-xs text-zinc-500 sm:text-sm">{subtitle}</p>
+        <div className="mb-8">
+          <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[#3D0F22]">
+            {title}
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-[#7A3350]">{subtitle}</p>
+        </div>
+
+        {children}
+
+        {footer ? (
+          <div className="mt-8 border-t border-[#5C1A33]/10 pt-6 text-center text-sm text-[#7A3350]">
+            {footer}
           </div>
+        ) : null}
 
-          <div className="mt-6 sm:mt-8">{children}</div>
-
-          {footer ? (
-            <div className="mt-6 sm:mt-8 border-t border-zinc-100 pt-5 text-center text-xs text-zinc-500 sm:text-sm">
-              {footer}
-            </div>
-          ) : null}
-        </div>
-
-        <p className="mt-6 sm:mt-8 text-center text-xs text-zinc-400">
+        <p className="mt-20 text-center text-xs text-zinc-400">
           &copy; 2026 Agendamentos. Todos os direitos reservados.
         </p>
       </div>

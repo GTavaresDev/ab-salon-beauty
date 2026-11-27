@@ -15,7 +15,6 @@ import {
 import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/button.component";
 import { Input } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/input.component";
 import { FieldLabel } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/field-label.component";
-import { AgendamentosLogo } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/agendamentos-logo.component";
 
 const businessModules = [
   { title: "Agenda", description: "Horários sem conflito", Icon: CalendarDays },
@@ -153,15 +152,24 @@ export function LoginScreen({ onLogin }: { onLogin: () => void }) {
         <div className="w-full max-w-[430px]">
           <div className="mb-10 flex justify-center lg:hidden">
             <Image
-              src="/images/brand/logo-horizontal.png"
+              src="/images/brand/logo-horizontal-transparente.png"
               alt="AB Salon Beauty"
-              width={1138}
-              height={353}
+              width={935}
+              height={240}
               className="h-20 w-auto object-contain"
             />
           </div>
-          <div className="mb-8 hidden lg:block">
-            <AgendamentosLogo variant="rose" size="lg" />
+          <div className="mb-8 hidden flex-col items-center gap-4 lg:flex">
+            <Image
+              src="/images/brand/logo-horizontal-transparente.png"
+              alt="AB Salon Beauty"
+              width={935}
+              height={240}
+              className="h-32 w-auto object-contain"
+            />
+            <span className="text-lg font-medium uppercase tracking-[0.25em] text-[#9B4A68]">
+              Gestão &amp; Agenda
+            </span>
           </div>
           <div className="mb-8">
             <p className="mb-3 text-sm font-medium text-zinc-500">

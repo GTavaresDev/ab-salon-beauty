@@ -30,21 +30,21 @@ function GoogleMark() {
  */
 export function GoogleSignIn({ label = "Continuar com Google" }: { label?: string }) {
   return (
-    <div className="mt-6">
+    <div className="mt-4">
       <div className="flex items-center gap-3" aria-hidden="true">
-        <span className="h-px flex-1 bg-zinc-200" />
-        <span className="text-xs font-medium uppercase tracking-wide text-zinc-400">
-          ou
+        <span className="h-px flex-1 bg-[#5C1A33]/15" />
+        <span className="text-xs font-medium uppercase tracking-wide text-[#7A3350]">
+          OU
         </span>
-        <span className="h-px flex-1 bg-zinc-200" />
+        <span className="h-px flex-1 bg-[#5C1A33]/15" />
       </div>
 
-      <form action={signInWithGoogleAction} className="mt-6">
+      <form action={signInWithGoogleAction} className="mt-4">
         <Button
           type="submit"
           variant="outline"
           size="lg"
-          className="w-full gap-2 font-medium"
+          className="w-full gap-2 border-[#5C1A33]/20 text-sm! font-semibold! text-[#5C1A33] hover:bg-[#FFF5F7] focus-visible:ring-[#7A3350] focus-visible:ring-offset-2"
         >
           <GoogleMark />
           {label}

@@ -45,6 +45,7 @@ test("portal protects appointment details and lets the client book", async ({ pa
   await page.getByRole("button", { name: "09:00" }).click();
   await page.getByRole("button", { name: "Confirmar agendamento" }).click();
 
-  await expect(page.getByRole("heading", { name: "Agendamento realizado!" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Solicitação enviada!" })).toBeVisible();
+  await expect(page.getByText(/aguardando a aprovação do profissional/)).toBeVisible();
   await expect(page.getByText(serviceName)).toBeVisible();
 });

@@ -10,7 +10,10 @@ export const STEP_TITLE: Record<Step, { title: string; subtitle: string }> = {
   data: { title: "Escolha a data", subtitle: "Mostramos apenas os dias com horário livre." },
   horario: { title: "Escolha o horário", subtitle: "Horários livres para a data escolhida." },
   confirmacao: { title: "Confirme seu agendamento", subtitle: "Revise antes de confirmar." },
-  sucesso: { title: "Agendamento realizado!", subtitle: "" },
+  sucesso: {
+    title: "Solicitação enviada!",
+    subtitle: "Seu agendamento está aguardando a aprovação do profissional. Você pode acompanhar o status em Meus agendamentos.",
+  },
 };
 
 export interface BookingWizardProps {

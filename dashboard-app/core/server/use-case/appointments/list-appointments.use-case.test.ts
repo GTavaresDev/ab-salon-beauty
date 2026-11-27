@@ -68,4 +68,24 @@ describe("ListAppointments", () => {
     expect(a1?.status).toBe("Cancelado");
     expect(a2?.status).toBe("Pendente");
   });
+
+  it("keeps same-day bookings pending until their start time in São Paulo", async () => {
+    const repo = mockAppointmentRepository();
+    repo.findByDate.mockResolvedValue([
+      buildAppointment({ date: "2026-11-27", time: "16:30", status: "Pendente" }),
+    ]);
+    const useCase = new ListAppointments(repo);
+    const actor = { id: "admin", role: "Administrador" } as const;
+    const filter = { date: "2026-11-27" };
+
+    const before = await useCase.execute(actor, filter, new Date("2026-11-27T19:21:33Z"));
+
+    expect(before[0].status).toBe("Pendente");
+    expect(repo.update).not.toHaveBeenCalled();
+
+    const after = await useCase.execute(actor, filter, new Date("2026-11-27T19:30:01Z"));
+
+    expect(after[0].status).toBe("Cancelado");
+    expect(repo.update).toHaveBeenCalledOnce();
+  });
 });

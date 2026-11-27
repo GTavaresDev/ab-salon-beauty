@@ -25,7 +25,7 @@ import {
   formatShortWeekday,
   isToday,
 } from "../portal-format/portal-format";
-import { STEP_ORDER, type BookingWizardProps } from "./booking-wizard.types";
+import { STEP_ORDER, STEP_TITLE, type BookingWizardProps } from "./booking-wizard.types";
 
 const STEP_META = [
   { label: "Serviço", Icon: ClipboardList },
@@ -278,10 +278,10 @@ function BookingSuccess({ appointment }: { appointment: ClientAppointmentDTO }) 
       </span>
 
       <h1 className="mt-5 text-2xl font-semibold tracking-[-0.02em] text-[#3D0F22]">
-        Agendamento realizado!
+        {STEP_TITLE.sucesso.title}
       </h1>
       <p className="mt-2 text-sm text-[#7A3350]">
-        Seu horário está reservado. A clínica confirmará em breve.
+        {STEP_TITLE.sucesso.subtitle}
       </p>
 
       <div className="mt-6 rounded-2xl border border-[#E7C5CF] bg-white p-5 text-left">

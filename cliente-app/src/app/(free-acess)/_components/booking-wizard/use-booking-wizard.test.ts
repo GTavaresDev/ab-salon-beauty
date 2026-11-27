@@ -28,7 +28,7 @@ describe("booking-wizard types & config", () => {
     expect(STEP_TITLE.data.title).toBe("Escolha a data");
     expect(STEP_TITLE.horario.title).toBe("Escolha o horário");
     expect(STEP_TITLE.confirmacao.title).toBe("Confirme seu agendamento");
-    expect(STEP_TITLE.sucesso.title).toBe("Agendamento realizado!");
+    expect(STEP_TITLE.sucesso.title).toBe("Solicitação enviada!");
   });
 });
 

@@ -4,7 +4,7 @@ import type { ClientScheduleAppointment } from "./client-schedule-conflict.busin
 
 const DATE = "2026-08-15";
 // Antes do expediente: nenhum horário do dia expirou ainda.
-const MORNING = new Date(2026, 7, 15, 7, 0, 0);
+const MORNING = new Date("2026-08-15T07:00:00-03:00");
 
 function appointment(
   overrides: Partial<ClientScheduleAppointment> = {},
@@ -82,7 +82,7 @@ describe("findAvailableStartTimes", () => {
     const times = findAvailableStartTimes([], {
       date: DATE,
       serviceMinutes: 30,
-      now: new Date(2026, 7, 15, 14, 0, 0),
+      now: new Date("2026-08-15T14:00:00-03:00"),
       ...client,
     });
 

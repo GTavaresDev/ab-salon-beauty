@@ -56,7 +56,7 @@ export default async function ClientHomePage() {
       </section>
 
       <section className="mt-8">
-        <h2 className="mb-3 text-sm font-semibold text-zinc-700">Seu próximo atendimento</h2>
+        <h2 className="mb-3 text-sm font-semibold text-[#5C1A33]">Seu próximo atendimento</h2>
 
         {!appointments.success ? (
           <p role="alert" className="rounded-2xl border border-zinc-200 bg-white p-5 text-sm text-zinc-700">
@@ -101,11 +101,11 @@ export default async function ClientHomePage() {
             </p>
           </Link>
         ) : (
-          <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-6 text-center">
-            <p className="text-sm font-medium text-zinc-950">
+          <div className="rounded-2xl border border-dashed border-[#DDAFBD] bg-white p-6 text-center">
+            <p className="text-sm font-medium text-[#3D0F22]">
               Você não tem atendimentos marcados.
             </p>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-[#9B4A68]">
               Escolha um serviço e reserve o melhor horário para você.
             </p>
             <Button className="mt-4" asChild>

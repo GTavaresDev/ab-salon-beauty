@@ -38,8 +38,8 @@ export function PortalNav({
               className={cn(
                 "flex h-11 w-full items-center gap-3 rounded-xl px-3 text-[14px] font-medium transition",
                 isActive
-                  ? "bg-zinc-950 text-white shadow-sm"
-                  : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950",
+                  ? "bg-[#5C1A33] text-white shadow-sm"
+                  : "text-[#7A3350] hover:bg-[#FCE8EE] hover:text-[#3D0F22]",
               )}
             >
               <Icon className="size-[18px] shrink-0 stroke-[1.75]" />
@@ -57,7 +57,7 @@ export function PortalNav({
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center gap-1 rounded-lg py-1.5 text-[11px] font-medium transition",
-                isActive ? "text-zinc-950" : "text-zinc-500",
+                isActive ? "text-[#5C1A33]" : "text-[#9B4A68]",
               )}
             >
               <Icon className={cn("size-5", isActive && "stroke-[2.2]")} />
@@ -75,8 +75,8 @@ export function PortalNav({
             className={cn(
               "rounded-xl px-4 py-2 text-sm font-medium transition-all",
               isActive
-                ? "bg-zinc-950 text-white shadow-sm"
-                : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950",
+                ? "bg-[#5C1A33] text-white shadow-sm"
+                : "text-[#7A3350] hover:bg-[#FCE8EE] hover:text-[#3D0F22]",
             )}
           >
             {label}

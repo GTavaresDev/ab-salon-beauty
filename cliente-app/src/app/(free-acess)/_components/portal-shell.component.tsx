@@ -65,12 +65,12 @@ export async function PortalShell({
     subtitle ?? "Gerencie seus agendamentos e acompanhe seus próximos horários.";
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-950">
+    <div className="min-h-screen bg-[#FFF9FB] text-[#3D0F22]">
       {!locked ? <AppointmentReviewModal reviews={pendingReviews} clientName={session.name} /> : null}
       <ForcedSessionLogout expiresAt={session.expiresAt} />
       {/* Sidebar Persistente no Desktop */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-zinc-200 bg-white p-4 lg:flex">
-        <div className="flex h-20 items-center px-3 border-b border-zinc-100">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-[#EFD7DE] bg-white p-4 lg:flex">
+        <div className="flex h-20 items-center border-b border-[#F3E3E8] px-3">
           <Link href="/cliente/painel" aria-label="Ir para o início">
             <AgendamentosLogo variant="light" size="md" />
           </Link>
@@ -78,7 +78,7 @@ export async function PortalShell({
 
         {locked ? null : (
           <>
-            <div className="mt-3 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+            <div className="mt-3 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9B4A68]">
               Menu principal
             </div>
 
@@ -88,17 +88,17 @@ export async function PortalShell({
 
         <div className="mt-auto space-y-1">
           {/* Só aparece quando a equipe está vendo o portal como este cliente. */}
-          <div className="my-2 h-px bg-zinc-100" />
-          <div className="relative flex items-center gap-3 rounded-xl p-2.5 bg-zinc-50/80 border border-zinc-100">
+          <div className="my-2 h-px bg-[#F3E3E8]" />
+          <div className="relative flex items-center gap-3 rounded-xl border border-[#F3E3E8] bg-[#FFF9FB] p-2.5">
             <Avatar
               initials={session.initials || "CL"}
-              className="size-10 bg-zinc-950 text-white shrink-0"
+              className="size-10 shrink-0 bg-[#5C1A33] text-white"
             />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-zinc-900">
+              <p className="truncate text-sm font-semibold text-[#3D0F22]">
                 {session.name}
               </p>
-              <p className="truncate text-xs font-medium text-zinc-500">
+              <p className="truncate text-xs font-medium text-[#9B4A68]">
                 Cliente
               </p>
             </div>
@@ -108,14 +108,14 @@ export async function PortalShell({
       </aside>
 
       {/* Header Mobile */}
-      <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur shadow-xs lg:hidden">
+      <header className="sticky top-0 z-30 border-b border-[#EFD7DE] bg-white/95 shadow-xs backdrop-blur lg:hidden">
         <div className="mx-auto flex h-16 w-full items-center justify-between gap-4 px-4 sm:px-6">
           <Link href="/cliente/painel" aria-label="Ir para o início" className="shrink-0">
             <AgendamentosLogo variant="light" size="sm" />
           </Link>
 
           <div className="flex items-center gap-2.5">
-            <span className="text-xs font-semibold text-zinc-800">
+            <span className="text-xs font-semibold text-[#5C1A33]">
               {firstName(session.name)}
             </span>
             <Avatar initials={session.initials || "CL"} className="size-8" />
@@ -129,12 +129,12 @@ export async function PortalShell({
       {/* Conteúdo Principal */}
       <div className="lg:pl-[256px]">
         {/* Header Superior da Página */}
-        <header className="sticky top-0 z-20 flex min-h-[58px] sm:min-h-[66px] items-center border-b border-zinc-200 bg-white/90 px-4 py-2.5 backdrop-blur sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-20 flex min-h-[58px] items-center border-b border-[#EFD7DE] bg-white/90 px-4 py-2.5 backdrop-blur sm:min-h-[66px] sm:px-6 lg:px-8">
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-base font-semibold tracking-[-0.02em] text-zinc-950 sm:text-xl leading-tight">
+            <h1 className="truncate text-base font-semibold leading-tight tracking-[-0.02em] text-[#3D0F22] sm:text-xl">
               {headerTitle}
             </h1>
-            <p className="truncate text-xs text-zinc-500 leading-tight mt-0.5">
+            <p className="mt-0.5 truncate text-xs leading-tight text-[#9B4A68]">
               {headerSubtitle}
             </p>
           </div>
@@ -148,7 +148,7 @@ export async function PortalShell({
       {/* Barra Inferior Mobile */}
       {locked ? null : (
         <PortalNav
-          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-zinc-200 bg-white px-2 py-2 lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-[#EFD7DE] bg-white px-2 py-2 lg:hidden"
           variant="bar"
         />
       )}

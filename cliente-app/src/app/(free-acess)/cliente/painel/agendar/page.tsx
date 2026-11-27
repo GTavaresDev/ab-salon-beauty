@@ -20,7 +20,7 @@ export default async function BookingPage() {
       {result.success ? (
         <BookingWizard flow={result.data} />
       ) : (
-        <p role="alert" className="rounded-2xl border border-zinc-200 bg-white p-5 text-sm text-zinc-700">
+        <p role="alert" className="rounded-2xl border border-[#E7C5CF] bg-white p-5 text-sm text-[#7A3350]">
           {result.error}
         </p>
       )}

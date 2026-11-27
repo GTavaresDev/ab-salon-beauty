@@ -2,7 +2,17 @@
 
 import { useBookingWizardView } from "../hooks/use-booking-wizard";
 import Link from "next/link";
-import { ArrowLeft, CalendarCheck, Check, ChevronRight, Clock } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarCheck,
+  CalendarDays,
+  Check,
+  ChevronRight,
+  CircleCheck,
+  ClipboardList,
+  Clock,
+  UserRound,
+} from "lucide-react";
 import type { ClientAppointmentDTO } from "@core/application/interfaces/appointments/client-appointment";
 import { Avatar } from "@/components/portal-ui/avatar.component";
 import { Button } from "@/components/portal-ui/button.component";
@@ -16,6 +26,14 @@ import {
   isToday,
 } from "../portal-format/portal-format";
 import { STEP_ORDER, type BookingWizardProps } from "./booking-wizard.types";
+
+const STEP_META = [
+  { label: "Serviço", Icon: ClipboardList },
+  { label: "Profissional", Icon: UserRound },
+  { label: "Data", Icon: CalendarDays },
+  { label: "Horário", Icon: Clock },
+  { label: "Confirmar", Icon: CircleCheck },
+];
 
 export function BookingWizard({ flow }: BookingWizardProps) {
   const {
@@ -47,34 +65,48 @@ export function BookingWizard({ flow }: BookingWizardProps) {
   }
 
   return (
-    <div>
-      <div className="mb-6">
+    <div className="mx-auto w-full max-w-6xl">
+      <div className="mb-7">
         {stepIndex > 0 ? (
           <button
             type="button"
             onClick={goBack}
-            className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 transition hover:text-zinc-950"
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-[#7A3350] transition hover:text-[#3D0F22]"
           >
             <ArrowLeft className="size-4" /> Voltar
           </button>
         ) : null}
 
-        <div className="mb-4 flex items-center gap-1.5" aria-hidden>
-          {STEP_ORDER.map((item, index) => (
-            <span
+        <div className="mb-7 grid grid-cols-5 gap-1.5 rounded-2xl border border-[#E7C5CF] bg-white p-3 shadow-[0_1px_2px_rgba(92,26,51,0.04)]">
+          {STEP_ORDER.map((item, index) => {
+            const { label, Icon } = STEP_META[index];
+            const isActive = index === stepIndex;
+            const isComplete = index < stepIndex;
+
+            return (
+            <div
               key={item}
+              aria-current={isActive ? "step" : undefined}
               className={cn(
-                "h-1 flex-1 rounded-full transition",
-                index <= stepIndex ? "bg-zinc-950" : "bg-zinc-200",
+                "flex min-w-0 flex-col items-center justify-center gap-1.5 rounded-xl px-1 py-2.5 text-center transition sm:py-3",
+                isActive
+                  ? "bg-[#5C1A33] text-white shadow-sm"
+                  : isComplete
+                    ? "bg-[#FCE8EE] text-[#5C1A33]"
+                    : "text-[#7A3350]",
               )}
-            />
-          ))}
+            >
+              <Icon className="size-4 sm:size-[18px]" />
+              <span className="truncate text-[10px] font-medium sm:text-xs">{label}</span>
+            </div>
+            );
+          })}
         </div>
 
-        <h1 className="text-xl font-semibold tracking-[-0.02em] text-zinc-950 sm:text-2xl">
+        <h1 className="text-xl font-semibold tracking-[-0.02em] text-[#3D0F22] sm:text-2xl">
           {title}
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">{subtitle}</p>
+        <p className="mt-1 text-sm text-[#7A3350]">{subtitle}</p>
       </div>
 
       {error ? (
@@ -83,7 +115,7 @@ export function BookingWizard({ flow }: BookingWizardProps) {
         </p>
       ) : null}
 
-      {loading ? <p className="text-sm text-zinc-500">Carregando...</p> : null}
+      {loading ? <p className="text-sm text-[#7A3350]">Carregando...</p> : null}
 
       {!loading && step === "servico" ? (
         <ul className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
@@ -92,26 +124,26 @@ export function BookingWizard({ flow }: BookingWizardProps) {
               <button
                 type="button"
                 onClick={() => selectService(item)}
-                className="flex h-full w-full items-start justify-between gap-3 rounded-2xl border border-zinc-200 bg-white p-4 text-left transition hover:border-zinc-400 hover:shadow-sm"
+                className="flex h-full min-h-24 w-full items-start justify-between gap-3 rounded-2xl border border-[#E7C5CF] bg-white p-4 text-left transition hover:border-[#9B4A68] hover:shadow-sm"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-zinc-950">{item.name}</p>
+                  <p className="text-sm font-semibold text-[#3D0F22]">{item.name}</p>
                   {item.description ? (
-                    <p className="mt-1 line-clamp-2 text-xs text-zinc-500">
+                    <p className="mt-1 line-clamp-2 text-xs text-[#7A3350]">
                       {item.description}
                     </p>
                   ) : null}
-                  <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600">
+                  <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#7A3350]">
                     <Clock className="size-3.5" />
                     {item.durationMinutes} min
                   </p>
                 </div>
-                <ChevronRight className="mt-0.5 size-4 shrink-0 text-zinc-400" />
+                <ChevronRight className="mt-0.5 size-4 shrink-0 text-[#B98A9C]" />
               </button>
             </li>
           ))}
           {services.length === 0 ? (
-            <li className="col-span-full rounded-2xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500">
+            <li className="col-span-full rounded-2xl border border-dashed border-[#DDAFBD] p-6 text-center text-sm text-[#7A3350]">
               Nenhum serviço disponível para agendamento no momento.
             </li>
           ) : null}
@@ -125,18 +157,18 @@ export function BookingWizard({ flow }: BookingWizardProps) {
               <button
                 type="button"
                 onClick={() => selectProfessional(item)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-zinc-200 bg-white p-4 text-left transition hover:border-zinc-400 hover:shadow-sm"
+                className="flex w-full items-center gap-3 rounded-2xl border border-[#E7C5CF] bg-white p-4 text-left transition hover:border-[#9B4A68] hover:shadow-sm"
               >
                 <Avatar initials={item.initials} />
-                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-zinc-950">
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-[#3D0F22]">
                   {item.name}
                 </span>
-                <ChevronRight className="size-4 shrink-0 text-zinc-400" />
+                <ChevronRight className="size-4 shrink-0 text-[#B98A9C]" />
               </button>
             </li>
           ))}
           {professionals.length === 0 ? (
-            <li className="col-span-full rounded-2xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500">
+            <li className="col-span-full rounded-2xl border border-dashed border-[#DDAFBD] p-6 text-center text-sm text-[#7A3350]">
               Nenhum profissional disponível para este serviço.
             </li>
           ) : null}
@@ -155,8 +187,8 @@ export function BookingWizard({ flow }: BookingWizardProps) {
                 className={cn(
                   "relative flex flex-col items-center justify-center rounded-xl border py-2.5 transition",
                   todayItem
-                    ? "border-zinc-950 bg-zinc-950 text-white shadow-sm ring-2 ring-zinc-950/20 hover:bg-zinc-850"
-                    : "border-zinc-200 bg-white text-zinc-950 hover:border-zinc-950 hover:shadow-xs",
+                    ? "border-[#5C1A33] bg-[#5C1A33] text-white shadow-sm ring-2 ring-[#5C1A33]/20 hover:bg-[#3D0F22]"
+                    : "border-[#E7C5CF] bg-white text-[#3D0F22] hover:border-[#9B4A68] hover:shadow-xs",
                 )}
               >
                 {todayItem ? (
@@ -164,21 +196,21 @@ export function BookingWizard({ flow }: BookingWizardProps) {
                     Hoje
                   </span>
                 ) : (
-                  <span className="text-[11px] font-semibold uppercase text-zinc-400">
+                  <span className="text-[11px] font-semibold uppercase text-[#B98A9C]">
                     {formatShortWeekday(item)}
                   </span>
                 )}
-                <span className={cn("text-lg font-bold leading-tight", todayItem ? "text-white" : "text-zinc-950")}>
+                <span className={cn("text-lg font-bold leading-tight", todayItem ? "text-white" : "text-[#3D0F22]")}>
                   {formatDayNumber(item)}
                 </span>
-                <span className={cn("text-[11px]", todayItem ? "text-zinc-300 font-medium" : "text-zinc-500")}>
+                <span className={cn("text-[11px]", todayItem ? "font-medium text-[#F8D9E2]" : "text-[#9B4A68]")}>
                   {formatMonthShort(item)}
                 </span>
               </button>
             );
           })}
           {dates.length === 0 ? (
-            <p className="col-span-full rounded-2xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500">
+            <p className="col-span-full rounded-2xl border border-dashed border-[#DDAFBD] p-6 text-center text-sm text-[#7A3350]">
               Não há datas com horários livres nos próximos dias.
             </p>
           ) : null}
@@ -187,7 +219,7 @@ export function BookingWizard({ flow }: BookingWizardProps) {
 
       {!loading && step === "horario" ? (
         <div>
-          <p className="mb-3 text-sm font-medium text-zinc-700">
+          <p className="mb-3 text-sm font-medium text-[#5C1A33]">
             {formatFriendlyDate(date)}
           </p>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -196,14 +228,14 @@ export function BookingWizard({ flow }: BookingWizardProps) {
                 key={item}
                 type="button"
                 onClick={() => selectTime(item)}
-                className="rounded-xl border border-zinc-200 bg-white py-3 text-sm font-semibold text-zinc-950 transition hover:border-zinc-950"
+                className="rounded-xl border border-[#E7C5CF] bg-white py-3 text-sm font-semibold text-[#3D0F22] transition hover:border-[#9B4A68] hover:bg-[#FFF4F7]"
               >
                 {item}
               </button>
             ))}
           </div>
           {times.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500">
+            <p className="rounded-2xl border border-dashed border-[#DDAFBD] p-6 text-center text-sm text-[#7A3350]">
               Nenhum horário livre nesta data. Escolha outro dia.
             </p>
           ) : null}
@@ -212,7 +244,7 @@ export function BookingWizard({ flow }: BookingWizardProps) {
 
       {!loading && step === "confirmacao" && service && professional ? (
         <div>
-          <dl className="divide-y divide-zinc-100 rounded-2xl border border-zinc-200 bg-white">
+          <dl className="divide-y divide-[#F3E3E8] rounded-2xl border border-[#E7C5CF] bg-white">
             <SummaryRow label="Serviço" value={service.name} />
             <SummaryRow label="Duração" value={`${service.durationMinutes} minutos`} />
             <SummaryRow label="Profissional" value={professional.name} />
@@ -232,8 +264,8 @@ export function BookingWizard({ flow }: BookingWizardProps) {
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 p-4">
-      <dt className="text-sm text-zinc-500">{label}</dt>
-      <dd className="text-right text-sm font-semibold text-zinc-950">{value}</dd>
+      <dt className="text-sm text-[#7A3350]">{label}</dt>
+      <dd className="text-right text-sm font-semibold text-[#3D0F22]">{value}</dd>
     </div>
   );
 }
@@ -241,28 +273,28 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 function BookingSuccess({ appointment }: { appointment: ClientAppointmentDTO }) {
   return (
     <div className="text-center">
-      <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-zinc-950 text-white">
+      <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#5C1A33] text-white">
         <Check className="size-7" />
       </span>
 
-      <h1 className="mt-5 text-2xl font-semibold tracking-[-0.02em] text-zinc-950">
+      <h1 className="mt-5 text-2xl font-semibold tracking-[-0.02em] text-[#3D0F22]">
         Agendamento realizado!
       </h1>
-      <p className="mt-2 text-sm text-zinc-500">
+      <p className="mt-2 text-sm text-[#7A3350]">
         Seu horário está reservado. A clínica confirmará em breve.
       </p>
 
-      <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 text-left">
-        <p className="flex items-center gap-2 text-sm font-semibold text-zinc-950">
+      <div className="mt-6 rounded-2xl border border-[#E7C5CF] bg-white p-5 text-left">
+        <p className="flex items-center gap-2 text-sm font-semibold text-[#3D0F22]">
           <CalendarCheck className="size-4" />
           {appointment.serviceName}
         </p>
-        <p className="mt-2 text-sm text-zinc-600">
+        <p className="mt-2 text-sm text-[#7A3350]">
           {formatDate(appointment.date)} às {appointment.time}
         </p>
-        <p className="text-sm text-zinc-600">{appointment.duration}</p>
+        <p className="text-sm text-[#7A3350]">{appointment.duration}</p>
         {appointment.professionalName ? (
-          <p className="mt-1 text-sm text-zinc-600">{appointment.professionalName}</p>
+          <p className="mt-1 text-sm text-[#7A3350]">{appointment.professionalName}</p>
         ) : null}
       </div>
 

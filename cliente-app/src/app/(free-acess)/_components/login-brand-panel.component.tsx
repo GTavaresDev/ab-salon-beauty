@@ -13,7 +13,7 @@ const cardClass =
 
 export function LoginBrandPanel() {
   return (
-    <section className="relative isolate flex flex-col overflow-hidden bg-linear-to-br from-[#F9CAD5] to-[#F4B6C6] px-6 py-6 text-[#5C1A33] sm:px-10 lg:px-12 lg:py-9">
+    <section className="relative isolate hidden flex-col overflow-hidden bg-linear-to-br from-[#F9CAD5] to-[#F4B6C6] px-6 py-6 text-[#5C1A33] sm:px-10 lg:flex lg:px-12 lg:py-9">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-24 -right-24 size-80 rounded-full bg-white/35 blur-3xl" />
         <div className="absolute -bottom-28 -left-24 size-80 rounded-full bg-[#B8912F]/15 blur-3xl" />

@@ -2,8 +2,8 @@ import { type ReactNode } from "react";
 import type { Metadata } from "next";
 import "./globals.css";
 
-const siteUrl = process.env.APP_URL || "https://agendamentos.vercel.app";
-const shareImage = `${siteUrl}/images/brand/logo-circulo.png`;
+const siteUrl = process.env.APP_URL || "https://painel.absalonbeauty.com.br";
+const shareImage = `${siteUrl}/og-image.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
       {
         url: shareImage,
         secureUrl: shareImage,
-        width: 1254,
-        height: 1254,
+        width: 1200,
+        height: 630,
         alt: "Agendamentos — Gestão Inteligente & Sistema de Agendamentos",
         type: "image/png",
       },
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     },
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Agendamentos — Gestão Inteligente & Sistema de Agendamentos",
     description: "Plataforma completa para controle de agendamentos, clientes, produtos e relatórios operacionais em tempo real.",
     images: [shareImage],

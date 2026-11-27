@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const siteUrl = process.env.APP_URL || "https://painel.absalonbeauty.com.br";
-const shareImage = `${siteUrl}/og-image.png`;
+const shareImage = `${siteUrl}/images/brand/logo-circulo.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
       {
         url: shareImage,
         secureUrl: shareImage,
-        width: 1200,
-        height: 630,
+        width: 1254,
+        height: 1254,
         alt: "Agendamentos — Gestão Inteligente & Sistema de Agendamentos",
         type: "image/png",
       },
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     },
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Agendamentos — Gestão Inteligente & Sistema de Agendamentos",
     description: "Plataforma completa para controle de agendamentos, clientes, produtos e relatórios operacionais em tempo real.",
     images: [shareImage],

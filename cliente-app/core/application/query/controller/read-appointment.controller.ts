@@ -14,10 +14,9 @@ export type PendingAppointmentReview = { appointmentId: string; date: string; ti
 export async function getClientAppointmentsAction(): Promise<ActionResult<ClientAppointmentsView>> {
   const result = await getMyAppointmentsGateway();
   if (result.tag === "left") {
-    console.error("Falha na consulta de agendamentos do portal", {
-      code: result.value.code,
-      statusCode: result.value.statusCode,
-    });
+    const { code = "UNKNOWN_ERROR", statusCode } = result.value;
+    const reason = statusCode === undefined ? code : `${code}, HTTP ${statusCode}`;
+    console.error(`Falha na consulta de agendamentos do portal (${reason})`);
     return { success: false, error: "Não foi possível carregar seus agendamentos. Tente novamente em instantes." };
   }
   return { success: true, data: result.value };

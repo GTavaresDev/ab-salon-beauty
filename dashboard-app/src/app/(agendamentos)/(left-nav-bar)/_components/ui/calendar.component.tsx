@@ -35,10 +35,10 @@ function CalendarDayButton({
       data-today={modifiers.today || undefined}
       data-outside={modifiers.outside || undefined}
       className={cn(
-        "relative flex size-9 items-center justify-center rounded-lg text-sm font-medium text-zinc-700 outline-none transition hover:bg-zinc-100 focus-visible:ring-2 focus-visible:ring-zinc-950/30 disabled:pointer-events-none disabled:text-zinc-300",
+        "relative flex size-9 items-center justify-center rounded-lg text-sm font-medium text-[#7A3350] outline-none transition hover:bg-[#FCE8EE] focus-visible:ring-2 focus-visible:ring-[#9B4A68]/30 disabled:pointer-events-none disabled:text-zinc-300",
         "data-[outside=true]:text-zinc-300",
-        "data-[today=true]:border data-[today=true]:border-zinc-950 data-[today=true]:font-semibold data-[today=true]:text-zinc-950",
-        "data-[selected=true]:bg-zinc-950 data-[selected=true]:text-white data-[selected=true]:shadow-sm data-[selected=true]:hover:bg-zinc-800",
+        "data-[today=true]:border data-[today=true]:border-[#9B4A68] data-[today=true]:font-semibold data-[today=true]:text-[#5C1A33]",
+        "data-[selected=true]:bg-[#5C1A33] data-[selected=true]:text-white data-[selected=true]:shadow-sm data-[selected=true]:hover:bg-[#3D0F22]",
         "data-[selected=true]:data-[today=true]:border-transparent data-[selected=true]:data-[today=true]:text-white",
         className,
       )}
@@ -48,7 +48,7 @@ function CalendarDayButton({
       {hasAppointment && (
         <span
           className={cn(
-            "absolute bottom-1 size-1 rounded-full bg-zinc-950",
+            "absolute bottom-1 size-1 rounded-full bg-[#B8912F]",
             modifiers.selected && "bg-white",
           )}
         />

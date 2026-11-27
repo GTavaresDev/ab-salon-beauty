@@ -7,7 +7,7 @@ export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
       <div
         ref={ref}
         className={cn(
-          "rounded-2xl border border-zinc-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]",
+          "rounded-2xl border border-[#EFD7DE] bg-white shadow-[0_1px_2px_rgba(92,26,51,0.04)]",
           className,
         )}
         {...props}
@@ -22,11 +22,11 @@ export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElemen
 }
 
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn("font-semibold tracking-tight text-zinc-950", className)} {...props} />;
+  return <h3 className={cn("font-semibold tracking-tight text-[#3D0F22]", className)} {...props} />;
 }
 
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("text-sm text-zinc-500", className)} {...props} />;
+  return <p className={cn("text-sm text-[#7A3350]", className)} {...props} />;
 }
 
 export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {

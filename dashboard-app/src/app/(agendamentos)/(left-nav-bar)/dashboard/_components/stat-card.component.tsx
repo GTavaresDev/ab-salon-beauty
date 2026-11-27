@@ -45,10 +45,10 @@ export function StatCard({
           : undefined
       }
       className={cn(
-        "@container/stat h-full overflow-hidden border border-zinc-700/70 bg-zinc-800 text-white shadow-sm transition-all flex flex-col justify-between select-none",
-        isInteractive && "cursor-pointer hover:border-zinc-500 hover:bg-zinc-750 active:scale-[0.99]",
-        active && "ring-2 ring-amber-500/80 border-amber-500/80 bg-zinc-800",
-        highlight && !active && "border-amber-500/60 bg-zinc-800",
+        "@container/stat flex h-full select-none flex-col justify-between overflow-hidden border border-[#E3AEBE] bg-gradient-to-br from-[#F9CAD5] to-[#F4B6C6] text-[#3D0F22] shadow-sm transition-all",
+        isInteractive && "cursor-pointer hover:border-[#9B4A68] hover:shadow-md active:scale-[0.99]",
+        active && "border-[#B8912F] ring-2 ring-[#B8912F]/50",
+        highlight && !active && "border-[#B8912F]/70",
       )}
     >
       <CardContent className="p-[clamp(0.75rem,4.5cqw,1.25rem)] flex flex-col justify-between h-full space-y-[clamp(0.5rem,2.5cqw,1rem)]">
@@ -56,9 +56,9 @@ export function StatCard({
           <div className="mb-[clamp(0.375rem,2.5cqw,0.75rem)] flex items-center justify-between gap-[clamp(0.25rem,1.5cqw,0.75rem)]">
             <div
               className={cn(
-                "flex size-[clamp(1.75rem,8cqw,2.5rem)] shrink-0 items-center justify-center rounded-xl bg-zinc-700/80 text-white transition-colors",
-                highlight && "bg-amber-500/20 text-amber-400",
-                active && "bg-amber-500 text-zinc-950",
+                "flex size-[clamp(1.75rem,8cqw,2.5rem)] shrink-0 items-center justify-center rounded-xl bg-white/65 text-[#5C1A33] transition-colors",
+                highlight && "bg-[#B8912F]/15 text-[#8A6819]",
+                active && "bg-[#B8912F] text-white",
               )}
             >
               <Icon className="size-[clamp(0.875rem,4cqw,1.25rem)]" />
@@ -67,7 +67,7 @@ export function StatCard({
               <Badge
                 variant="outline"
                 className={cn(
-                  "border-white/15 bg-white/10 text-[clamp(0.5625rem,2.5cqw,0.75rem)] font-medium text-white px-[clamp(0.375rem,1.8cqw,0.5rem)] py-[clamp(0.125rem,0.8cqw,0.25rem)] shrink-0 whitespace-nowrap leading-none flex items-center",
+                  "flex shrink-0 items-center whitespace-nowrap border-white/80 bg-white/45 px-[clamp(0.375rem,1.8cqw,0.5rem)] py-[clamp(0.125rem,0.8cqw,0.25rem)] text-[clamp(0.5625rem,2.5cqw,0.75rem)] font-medium leading-none text-[#5C1A33]",
                   badgeClassName,
                 )}
               >
@@ -75,7 +75,7 @@ export function StatCard({
               </Badge>
             )}
           </div>
-          <p className="text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-medium text-zinc-300 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
+          <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-medium leading-tight text-[#7A3350]">
             {label}
           </p>
         </div>
@@ -84,20 +84,20 @@ export function StatCard({
           <div className="flex items-baseline justify-between gap-x-[clamp(0.25rem,1.5cqw,0.5rem)]">
             <p
               className={cn(
-                "text-[clamp(1.125rem,6.8cqw,1.875rem)] font-semibold tracking-[-0.04em] text-white tabular-nums leading-none whitespace-nowrap",
-                highlight && "text-amber-300",
+                "whitespace-nowrap text-[clamp(1.125rem,6.8cqw,1.875rem)] font-semibold leading-none tracking-[-0.04em] text-[#3D0F22] tabular-nums",
+                highlight && "text-[#8A6819]",
               )}
             >
               {value}
             </p>
-            <span className="text-[clamp(0.5625rem,2.6cqw,0.75rem)] text-zinc-400 font-normal leading-none whitespace-nowrap shrink-0">
+            <span className="shrink-0 whitespace-nowrap text-[clamp(0.5625rem,2.6cqw,0.75rem)] font-normal leading-none text-[#9B4A68]">
               {detail}
             </span>
           </div>
           {progress !== undefined && (
-            <div className="mt-[clamp(0.375rem,2cqw,0.75rem)] h-[clamp(0.25rem,1.2cqw,0.375rem)] overflow-hidden rounded-full bg-zinc-700">
+            <div className="mt-[clamp(0.375rem,2cqw,0.75rem)] h-[clamp(0.25rem,1.2cqw,0.375rem)] overflow-hidden rounded-full bg-[#5C1A33]/15">
               <div
-                className="h-full rounded-full bg-white transition-[width] duration-300"
+                className="h-full rounded-full bg-[#5C1A33] transition-[width] duration-300"
                 style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
               />
             </div>

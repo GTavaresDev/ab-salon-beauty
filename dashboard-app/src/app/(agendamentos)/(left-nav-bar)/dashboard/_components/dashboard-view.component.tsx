@@ -42,7 +42,6 @@ export function DashboardView() {
   const {
     router,
     currentUser,
-    showToast,
     appointmentsLoading,
     clientsLoading,
     serviceList,
@@ -125,7 +124,7 @@ export function DashboardView() {
               badgeClassName={
                 pendingAppointments.length > 0
                   ? "border-amber-500/30 bg-amber-500/20 text-amber-300"
-                  : "border-white/10 bg-white/5 text-zinc-400"
+                  : "border-white/80 bg-white/45 text-[#7A3350]"
               }
               onClick={() => setOnlyPending((prev) => !prev)}
             />
@@ -147,7 +146,7 @@ export function DashboardView() {
             isFuncionario && "mx-auto w-full max-w-[900px]",
           )}
         >
-          <h2 className="mb-2.5 text-sm sm:text-base font-semibold tracking-tight text-zinc-950">
+          <h2 className="mb-2.5 text-sm font-semibold tracking-tight text-[#3D0F22] sm:text-base">
             Começar
           </h2>
           <div
@@ -161,12 +160,12 @@ export function DashboardView() {
             <button
               type="button"
               onClick={onNew}
-              className="group flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-4 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[85px] sm:min-h-[125px] h-full"
+              className="group flex h-full min-h-[85px] flex-col items-center justify-center rounded-xl border border-[#E7C5CF] bg-white p-2 text-center shadow-xs transition-all hover:border-[#9B4A68] hover:bg-[#FFF4F7] hover:shadow-md active:scale-[0.98] sm:min-h-[125px] sm:rounded-2xl sm:p-4"
             >
-              <div className="flex size-8 sm:size-12 items-center justify-center rounded-lg sm:rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-[#FCE8EE] text-[#5C1A33] transition-transform group-hover:scale-105 sm:size-12 sm:rounded-xl">
                 <Plus className="size-4 sm:size-6 stroke-[2]" />
               </div>
-              <span className="mt-1.5 sm:mt-3 text-[11px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center w-full">
+              <span className="mt-1.5 w-full text-center text-[11px] font-semibold leading-tight text-[#3D0F22] sm:mt-3 sm:text-xs">
                 <span className="sm:hidden">Agendar</span>
                 <span className="hidden sm:inline">Novo agendamento</span>
               </span>
@@ -175,12 +174,12 @@ export function DashboardView() {
             <button
               type="button"
               onClick={onVerAgenda}
-              className="group flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-4 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[85px] sm:min-h-[125px] h-full"
+              className="group flex h-full min-h-[85px] flex-col items-center justify-center rounded-xl border border-[#E7C5CF] bg-white p-2 text-center shadow-xs transition-all hover:border-[#9B4A68] hover:bg-[#FFF4F7] hover:shadow-md active:scale-[0.98] sm:min-h-[125px] sm:rounded-2xl sm:p-4"
             >
-              <div className="flex size-8 sm:size-12 items-center justify-center rounded-lg sm:rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-[#FCE8EE] text-[#5C1A33] transition-transform group-hover:scale-105 sm:size-12 sm:rounded-xl">
                 <CalendarDays className="size-4 sm:size-6 stroke-[1.75]" />
               </div>
-              <span className="mt-1.5 sm:mt-3 text-[11px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center w-full">
+              <span className="mt-1.5 w-full text-center text-[11px] font-semibold leading-tight text-[#3D0F22] sm:mt-3 sm:text-xs">
                 <span className="sm:hidden">Agenda</span>
                 <span className="hidden sm:inline">Ver agenda completa</span>
               </span>
@@ -190,12 +189,12 @@ export function DashboardView() {
               <button
                 type="button"
                 onClick={() => router.push("/clientes?novo=1")}
-                className="group flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-4 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[85px] sm:min-h-[125px] h-full"
+                className="group flex h-full min-h-[85px] flex-col items-center justify-center rounded-xl border border-[#E7C5CF] bg-white p-2 text-center shadow-xs transition-all hover:border-[#9B4A68] hover:bg-[#FFF4F7] hover:shadow-md active:scale-[0.98] sm:min-h-[125px] sm:rounded-2xl sm:p-4"
               >
-                <div className="flex size-8 sm:size-12 items-center justify-center rounded-lg sm:rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-[#FCE8EE] text-[#5C1A33] transition-transform group-hover:scale-105 sm:size-12 sm:rounded-xl">
                   <UserCheck className="size-4 sm:size-6 stroke-[1.75]" />
                 </div>
-                <span className="mt-1.5 sm:mt-3 text-[11px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center w-full">
+                <span className="mt-1.5 w-full text-center text-[11px] font-semibold leading-tight text-[#3D0F22] sm:mt-3 sm:text-xs">
                   <span className="sm:hidden">Clientes</span>
                   <span className="hidden sm:inline">Cadastrar cliente</span>
                 </span>
@@ -205,12 +204,12 @@ export function DashboardView() {
             <button
               type="button"
               onClick={() => router.push("/vendas?novo=1")}
-              className="group flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-4 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[85px] sm:min-h-[125px] h-full"
+              className="group flex h-full min-h-[85px] flex-col items-center justify-center rounded-xl border border-[#E7C5CF] bg-white p-2 text-center shadow-xs transition-all hover:border-[#9B4A68] hover:bg-[#FFF4F7] hover:shadow-md active:scale-[0.98] sm:min-h-[125px] sm:rounded-2xl sm:p-4"
             >
-              <div className="flex size-8 sm:size-12 items-center justify-center rounded-lg sm:rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-[#FCE8EE] text-[#5C1A33] transition-transform group-hover:scale-105 sm:size-12 sm:rounded-xl">
                 <ShoppingCart className="size-4 sm:size-6 stroke-[1.75]" />
               </div>
-              <span className="mt-1.5 sm:mt-3 text-[11px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center w-full">
+              <span className="mt-1.5 w-full text-center text-[11px] font-semibold leading-tight text-[#3D0F22] sm:mt-3 sm:text-xs">
                 <span className="sm:hidden">Vendas</span>
                 <span className="hidden sm:inline">Registrar venda</span>
               </span>
@@ -447,13 +446,13 @@ export function DashboardView() {
                       <div key={index} className="group flex h-full flex-1 flex-col items-center justify-end">
                         <div
                           className={cn(
-                            "relative w-full rounded-t-md transition-all group-hover:bg-zinc-700",
-                            isToday ? "bg-zinc-950" : "bg-zinc-200",
+                            "relative w-full rounded-t-md transition-all group-hover:bg-[#9B4A68]",
+                            isToday ? "bg-[#5C1A33]" : "bg-[#F4B6C6]",
                           )}
                           style={{ height: `${height}%`, minHeight: height > 0 ? "8px" : "0px" }}
                         >
                           {dayAppointments > 0 && (
-                            <span className="absolute -top-7 left-1/2 -translate-x-1/2 rounded bg-black px-1.5 py-0.5 text-[9px] font-semibold text-white">
+                            <span className="absolute -top-7 left-1/2 -translate-x-1/2 rounded bg-[#5C1A33] px-1.5 py-0.5 text-[9px] font-semibold text-white">
                               {dayAppointments}
                             </span>
                           )}
@@ -468,7 +467,7 @@ export function DashboardView() {
                   <span>QUA</span>
                   <span>QUI</span>
                   <span>SEX</span>
-                  <span className={new Date().getDay() === 6 ? "text-zinc-950" : ""}>SÁB</span>
+                  <span className={new Date().getDay() === 6 ? "text-[#5C1A33]" : ""}>SÁB</span>
                   <span>DOM</span>
                 </div>
                 {(() => {
@@ -484,12 +483,12 @@ export function DashboardView() {
                   const diff = ((todayCount - weekAvg) / Math.max(weekAvg, 1)) * 100;
 
                   return (
-                    <div className="mt-6 flex items-center gap-4 rounded-xl bg-zinc-50 p-4">
-                      <div className="flex size-10 items-center justify-center rounded-full bg-white shadow-sm">
+                    <div className="mt-6 flex items-center gap-4 rounded-xl bg-[#FFF4F7] p-4">
+                      <div className="flex size-10 items-center justify-center rounded-full bg-white text-[#5C1A33] shadow-sm">
                         <TrendingUp className="size-4" />
                       </div>
-                      <p className="text-xs leading-5 text-zinc-500">
-                        <strong className="block text-sm text-zinc-900">
+                      <p className="text-xs leading-5 text-[#7A3350]">
+                        <strong className="block text-sm text-[#3D0F22]">
                           {todayCount > 0
                             ? `Hoje com ${Math.abs(Math.round(diff))}% ${diff >= 0 ? "mais" : "menos"} agendamentos`
                             : "Nenhum agendamento hoje"}

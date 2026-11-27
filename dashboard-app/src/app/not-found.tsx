@@ -8,12 +8,12 @@ export const metadata: Metadata = { title: "Página não encontrada" };
 
 export default function NotFound() {
   return (
-    <main className="grid min-h-dvh place-items-center bg-zinc-50 px-5 py-8 text-zinc-950">
-      <div className="grid w-full max-w-4xl overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm md:grid-cols-2">
-        <div className="relative isolate grid min-h-40 place-items-center overflow-hidden bg-zinc-950 p-7 text-white sm:p-10 md:min-h-96">
+    <main className="grid min-h-dvh place-items-center bg-[#FFF9FB] px-5 py-8 text-[#5C1A33]">
+      <div className="grid w-full max-w-4xl overflow-hidden rounded-3xl border border-[#EFD7DE] bg-white shadow-sm md:grid-cols-2">
+        <div className="relative isolate grid min-h-40 place-items-center overflow-hidden bg-linear-to-br from-[#5C1A33] to-[#3D0F22] p-7 sm:p-10 md:min-h-96">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 -z-10 [background-image:linear-gradient(rgba(255,255,255,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.05)_1px,transparent_1px)] [background-size:48px_48px]"
+            className="pointer-events-none absolute inset-0 -z-10 [background-image:linear-gradient(rgba(249,202,213,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(249,202,213,.12)_1px,transparent_1px)] [background-size:48px_48px]"
           />
           <AgendamentosLogo variant="dark" size="lg" className="sm:scale-125" />
         </div>
@@ -21,7 +21,7 @@ export default function NotFound() {
           <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
             Página não encontrada
           </h1>
-          <p className="mt-4 text-sm leading-6 text-zinc-600">
+          <p className="mt-4 text-sm leading-6 text-[#7A3350]">
             Confira o endereço ou volte ao painel para continuar.
           </p>
           <Button asChild className="mt-7">

@@ -33,7 +33,7 @@ export function canAccessUsers(user?: UserWithPermissions | null): boolean {
 }
 
 export function canApprovePortalAccess(user: UserWithPermissions): boolean {
-  return user.role === "Gestor" || user.role === "Administrador";
+  return user.permissionLevel === 1 && user.role === "Administrador";
 }
 
 export function canManageSales(user?: (UserWithPermissions & { impersonating?: boolean }) | null): boolean {

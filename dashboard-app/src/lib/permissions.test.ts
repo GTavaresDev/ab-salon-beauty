@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canAccessOperationalCatalog,
+  canApprovePortalAccess,
   canAccessReports,
   canViewDashboardMetrics,
   isEmployee,
@@ -42,5 +43,14 @@ describe("acesso a relatórios", () => {
     expect(canAccessReports({ role: "Gestor", permissions: [{ ...reportPermission, enabled: false }] })).toBe(false);
     expect(canAccessReports({ role: "Gestor", permissions: [{ ...reportPermission, viewReports: false }] })).toBe(false);
     expect(canAccessReports({ role: "Gestor", permissions: [{ ...reportPermission, name: "Ver_Relatorios" }] })).toBe(false);
+  });
+});
+
+describe("aprovação do portal", () => {
+  it("permite somente Product Manegar", () => {
+    expect(canApprovePortalAccess({ role: "Administrador", permissionLevel: 1 })).toBe(true);
+    expect(canApprovePortalAccess({ role: "Gestor", permissionLevel: 2 })).toBe(false);
+    expect(canApprovePortalAccess({ role: "Funcionario", permissionLevel: 3 })).toBe(false);
+    expect(canApprovePortalAccess({ role: "Administrador", permissionLevel: 2 })).toBe(false);
   });
 });

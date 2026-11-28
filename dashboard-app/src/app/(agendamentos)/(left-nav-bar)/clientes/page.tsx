@@ -2,6 +2,7 @@ import { pendingPortalClients } from "@core/application/query/controller/clients
 import { PortalApproval } from "./_components/portal-approval.component";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { canApprovePortalAccess } from "@/lib/permissions";
 import { ClientsView } from "./_components/clients-view.component";
 
 export default async function ClientsPage() {
@@ -10,6 +11,6 @@ export default async function ClientsPage() {
     redirect("/login");
   }
 
-  const pending = await pendingPortalClients();
-  return <><PortalApproval clients={pending} /><ClientsView /></>;
+  const pending = canApprovePortalAccess(session.user) ? await pendingPortalClients() : [];
+  return <>{canApprovePortalAccess(session.user) && <PortalApproval clients={pending} />}<ClientsView /></>;
 }

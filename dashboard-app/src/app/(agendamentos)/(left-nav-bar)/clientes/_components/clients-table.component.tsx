@@ -20,6 +20,7 @@ export function ClientsTable({
   statusFilter = "Todos",
   onStatusFilterChange,
   appointmentList,
+  contactSuggestions = [],
   page,
   onPageChange,
   onEdit,
@@ -32,6 +33,7 @@ export function ClientsTable({
   statusFilter?: string;
   onStatusFilterChange?: (status: string) => void;
   appointmentList: AppointmentProps[];
+  contactSuggestions?: { client: ClientProps; lastVisit: string }[];
   page: number;
   onPageChange: (page: number) => void;
   onEdit: (client: ClientProps) => void;
@@ -120,6 +122,12 @@ export function ClientsTable({
               formatAppointmentRelativeLabel(lastAppointment);
           }
 
+          const suggestion = contactSuggestions.find((item) => item.client.id === client.id);
+          if (suggestion) {
+            const [year, month, day] = suggestion.lastVisit.split("-");
+            lastAppointmentLabel = `Última visita: ${day}/${month}/${year}`;
+          }
+
           const actionMenuNode = (
             <div className="relative">
               <button
@@ -173,7 +181,7 @@ export function ClientsTable({
                   </>
                 )}
                 <span className="text-zinc-300 shrink-0">•</span>
-                <span className="shrink-0 text-zinc-400">Último: {lastAppointmentLabel}</span>
+                <span className={suggestion ? "shrink-0 font-medium text-amber-700" : "shrink-0 text-zinc-400"}>{suggestion ? lastAppointmentLabel : `Último: ${lastAppointmentLabel}`}</span>
               </div>
 
               {/* Desktop Client Info */}
@@ -212,7 +220,7 @@ export function ClientsTable({
               </div>
 
               {/* Desktop Last Appointment */}
-              <div className="hidden lg:block text-xs font-medium text-zinc-500">
+              <div className={suggestion ? "hidden lg:block text-xs font-medium text-amber-700" : "hidden lg:block text-xs font-medium text-zinc-500"}>
                 {lastAppointmentLabel}
               </div>
 

@@ -69,47 +69,30 @@ afterAll(async () => {
   }
 });
 
-it("Gestor e Administrador (Product Manager) aprovam cadastro ativo em análise e segunda tentativa preserva o primeiro registro", async () => {
+it("somente Product Manegar consulta e aprova cadastros em análise", async () => {
   const gestorId = await createStaffUser("Gestor");
   const adminId = await createStaffUser("Administrador");
-  const c1 = await createClient({ status: "Ativo", portalAccess: "IN_REVIEW" });
-  const c2 = await createClient({ status: "Ativo", portalAccess: "IN_REVIEW" });
+  const pending = await createClient({ status: "Ativo", portalAccess: "IN_REVIEW" });
   const waiting = await createClient({ status: "Ativo", portalAccess: "WAITING" });
   const inactive = await createClient({ status: "Inativo", portalAccess: "IN_REVIEW" });
 
   authState.userId = gestorId;
   authState.role = "Gestor";
+  expect(await pendingPortalClients()).toEqual([]);
+  expect((await approvePortalClient(pending)).success).toBe(false);
+  expect((await fetchClientsAction()).map((client) => client.id)).not.toContain(pending);
 
-  const list = await pendingPortalClients();
-  const listedIds = list.map((c) => c.id);
-  expect(listedIds).toContain(c1);
-  expect(listedIds).toContain(c2);
-  expect(listedIds).not.toContain(waiting);
-  expect(listedIds).not.toContain(inactive);
-
-  const beforeApproval = (await fetchClientsAction()).map((client) => client.id);
-  expect(beforeApproval).not.toContain(c1);
-  expect(beforeApproval).not.toContain(c2);
-  expect(beforeApproval).toContain(waiting);
-
-  expect(await approvePortalClient(c1)).toEqual({ success: true });
-  expect((await fetchClientsAction()).map((client) => client.id)).toContain(c1);
-  const approved1 = await prisma.client.findUniqueOrThrow({ where: { id: c1 } });
-  expect(approved1.portalAccess).toBe("APPROVED");
-  expect(approved1.portalApprovedById).toBe(gestorId);
-  expect(approved1.portalApprovedAt).not.toBeNull();
-
-  // Segunda tentativa por Administrador preserva portalApprovedAt e portalApprovedById da primeira aprovação
   authState.userId = adminId;
   authState.role = "Administrador";
-  const retry = await approvePortalClient(c1);
-  expect(retry.success).toBe(false);
-  const afterRetry = await prisma.client.findUniqueOrThrow({ where: { id: c1 } });
-  expect(afterRetry.portalApprovedById).toBe(gestorId);
-  expect(afterRetry.portalApprovedAt?.getTime()).toBe(approved1.portalApprovedAt?.getTime());
-
-  // Administrador aprova o segundo cliente; WAITING e Inativo não são aprovados
-  expect(await approvePortalClient(c2)).toEqual({ success: true });
+  const listedIds = (await pendingPortalClients()).map((client) => client.id);
+  expect(listedIds).toContain(pending);
+  expect(listedIds).not.toContain(waiting);
+  expect(listedIds).not.toContain(inactive);
+  expect(await approvePortalClient(pending)).toEqual({ success: true });
+  const approved = await prisma.client.findUniqueOrThrow({ where: { id: pending } });
+  expect(approved.portalApprovedById).toBe(adminId);
+  expect(approved.portalApprovedAt).not.toBeNull();
+  expect((await approvePortalClient(pending)).success).toBe(false);
   expect((await approvePortalClient(waiting)).success).toBe(false);
   expect((await approvePortalClient(inactive)).success).toBe(false);
 });

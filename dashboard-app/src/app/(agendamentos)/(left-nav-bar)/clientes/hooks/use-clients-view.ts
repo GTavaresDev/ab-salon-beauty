@@ -8,6 +8,7 @@ import { paginateItems } from "@/lib/pagination";
 import { useAppShell } from "@/stores/app-shell.store";
 import { useAppointments } from "@/app/(agendamentos)/(left-nav-bar)/agenda/hooks/use-appointments";
 import { useClients } from "@/app/(agendamentos)/(left-nav-bar)/clientes/hooks/use-clients";
+import { getContactSuggestions } from "@/lib/contact-suggestions";
 import { ClientProps } from "@core/application/query/interface/client.entity";
 
 export function useClientsView() {
@@ -54,6 +55,7 @@ export function useClientsView() {
     return clientList.filter((c) => Boolean(c?.name) && getLastAppointmentForClient(appointmentList, c) !== null).length;
   }, [clientList, appointmentList]);
   const inactiveClients = clientList.filter((c) => c.status === "Inativo").length;
+  const contactSuggestions = useMemo(() => getContactSuggestions(clientList, appointmentList), [clientList, appointmentList]);
   return {
     isLoading,
     handleAddClient,
@@ -79,5 +81,6 @@ export function useClientsView() {
     activeClients,
     clientsWithAppointments,
     inactiveClients,
+    contactSuggestions,
   };
 }

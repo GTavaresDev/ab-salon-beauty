@@ -12,6 +12,7 @@ import {
 import { ClientsTable } from "./clients-table.component";
 import { CreateClientDialog } from "./create-client-dialog.component";
 import { EditClientDialog } from "./edit-client-dialog.component";
+import { ContactSuggestions } from "./contact-suggestions.component";
 
 export function ClientsView() {
   const {
@@ -39,6 +40,7 @@ export function ClientsView() {
     activeClients,
     clientsWithAppointments,
     inactiveClients,
+    contactSuggestions,
   } = useClientsView();
 
   if (!currentUser) return null;
@@ -54,6 +56,7 @@ export function ClientsView() {
 
   return (
     <div className="mx-auto max-w-375 p-3.5 sm:p-6 lg:p-8">
+      {currentUser.role === "Gestor" && <ContactSuggestions suggestions={contactSuggestions} />}
       {/* 4 Metric Cards at Top */}
       <div className="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <Card className="@container/card p-[clamp(0.75rem,4cqw,1.25rem)] flex flex-col justify-between h-full shadow-xs hover:border-zinc-300 transition-all">
@@ -114,6 +117,7 @@ export function ClientsView() {
         statusFilter={statusFilter}
         onStatusFilterChange={(value) => { setStatusFilter(value); setPage(1); }}
         appointmentList={appointmentList}
+        contactSuggestions={contactSuggestions}
         page={page}
         onPageChange={setPage}
         onEdit={(client) => setEditingClient(client)}
